@@ -18,28 +18,28 @@ sub add {
     my $name = $parse->{name};
     # check and normalize domain
     # XXX doesn't check for public suffixes; see Mozilla::PublicSuffix
-    if ( exists $parse->{attr}{domain} ) {
-        return unless _domain_match( $host, $parse->{attr}{domain} );
-        $parse->{attr}{hostonly} = 0;
+    if ( exists $parse->{domain} ) {
+        return unless _domain_match( $host, $parse->{domain} );
+        $parse->{hostonly} = 0;
     }
     else {
-        $parse->{attr}{domain}   = $host;
-        $parse->{attr}{hostonly} = 1;
+        $parse->{domain}   = $host;
+        $parse->{hostonly} = 1;
     }
-    my $domain = $parse->{attr}{domain};
+    my $domain = $parse->{domain};
     # normalize path
-    if ( !exists $parse->{attr}{path} || substr( $parse->{attr}{path}, 0, 1 ) ne "/" ) {
-        $parse->{attr}{path} = _default_path($request_path);
+    if ( !exists $parse->{path} || substr( $parse->{path}, 0, 1 ) ne "/" ) {
+        $parse->{path} = _default_path($request_path);
     }
-    my $path = $parse->{attr}{path};
+    my $path = $parse->{path};
     # set timestamps and normalize expires
-    my $now = $parse->{attr}{creation_time} = $parse->{attr}{last_access_time} = time;
-    if ( exists $parse->{attr}{'max-age'} ) {
-        $parse->{expires} = $now + $parse->{attr}{'max-age'};
+    my $now = $parse->{creation_time} = $parse->{last_access_time} = time;
+    if ( exists $parse->{'max-age'} ) {
+        $parse->{expires} = $now + $parse->{'max-age'};
     }
     # update creation time from old cookie, if exists
     if ( my $old = $self->{store}{$domain}{$path}{$name} ) {
-        $parse->{attr}{creation_time} = $old->{attr}{creation_time};
+        $parse->{creation_time} = $old->{creation_time};
     }
     # if cookie has expired, purge any old matching cookie, too
     if ( defined $parse->{expires} && $parse->{expires} < $now ) {
@@ -59,7 +59,7 @@ sub _parse_cookie {
     my ( $kvp, @attrs ) = split /;/, $cookie // '';
     my ( $name, $value ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '';
     return unless length $name && length $value;
-    my $parse = { name => $name, value => $value, attr => {} };
+    my $parse = { name => $name, value => $value };
     for my $s (@attrs) {
         next unless defined $s && $s =~ /\S/;
         my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $s;
@@ -69,7 +69,7 @@ sub _parse_cookie {
         $v = _parse_http_date($v) if $k eq 'expires'; # convert to epoch
         next unless length $v;
         $v =~ s{^\.}{} if $k eq 'domain';             # strip leading dot
-        $parse->{attr}{ lc $k } = $v;
+        $parse->{$k} = $v;
     }
     return $parse;
 }

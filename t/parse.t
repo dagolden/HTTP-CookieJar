@@ -28,7 +28,6 @@ my @cases = (
         parse  => {
             name  => "SID",
             value => "31d4d96e407aad42",
-            attr => {},
         }
     },
     {
@@ -36,40 +35,33 @@ my @cases = (
         parse  => {
             name  => "SID",
             value => "31d4d96e407aad42",
-            attr => {},
         }
     },
     {
         cookie => "SID=31d4d96e407aad42; Path=/; Secure; HttpOnly",
         parse  => {
-            name  => "SID",
-            value => "31d4d96e407aad42",
-            attr  => {
-                path     => "/",
-                secure   => 1,
-                httponly => 1,
-            },
+            name     => "SID",
+            value    => "31d4d96e407aad42",
+            path     => "/",
+            secure   => 1,
+            httponly => 1,
         }
     },
     {
         cookie => "SID=31d4d96e407aad42; Domain=.example.com",
         parse  => {
-            name  => "SID",
-            value => "31d4d96e407aad42",
-            attr  => {
-                domain => "example.com",
-            },
+            name   => "SID",
+            value  => "31d4d96e407aad42",
+            domain => "example.com",
         }
     },
     {
         cookie => "SID=31d4d96e407aad42; Path=/; Domain=example.com",
         parse  => {
-            name  => "SID",
-            value => "31d4d96e407aad42",
-            attr  => {
-                path   => "/",
-                domain => "example.com",
-            },
+            name   => "SID",
+            value  => "31d4d96e407aad42",
+            path   => "/",
+            domain => "example.com",
         }
     },
     {
@@ -77,30 +69,24 @@ my @cases = (
         parse  => {
             name  => "SID",
             value => "31d4d96e407aad42",
-            attr  => {
-                path   => "/",
-            },
+            path  => "/",
         }
     },
     {
         cookie => "lang=en-US; Expires = Wed, 09 Jun 2021 10:18:14 GMT",
         parse  => {
-            name  => "lang",
-            value => "en-US",
-            attr  => {
-                expires => 1623233894,
-            },
+            name    => "lang",
+            value   => "en-US",
+            expires => 1623233894,
         }
     },
     {
         cookie => "lang=en-US; Expires = Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=3600",
         parse  => {
-            name  => "lang",
-            value => "en-US",
-            attr  => {
-                expires => 1623233894,
-                'max-age' => 3600,
-            },
+            name      => "lang",
+            value     => "en-US",
+            expires   => 1623233894,
+            'max-age' => 3600,
         }
     },
 );

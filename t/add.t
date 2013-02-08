@@ -21,15 +21,13 @@ my @cases = (
             'example.com' => {
                 '/' => {
                     SID => {
-                        name  => "SID",
-                        value => "31d4d96e407aad42",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "example.com",
-                            hostonly         => 1,
-                            path             => "/",
-                        },
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "example.com",
+                        hostonly         => 1,
+                        path             => "/",
                     }
                 }
             },
@@ -61,15 +59,13 @@ my @cases = (
             'example.com' => {
                 '/' => {
                     SID => {
-                        name  => "SID",
-                        value => "31d4d96e407aad42",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "example.com",
-                            hostonly         => 0,
-                            path             => "/",
-                        },
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "example.com",
+                        hostonly         => 0,
+                        path             => "/",
                     }
                 }
             },
@@ -83,15 +79,13 @@ my @cases = (
             'www.example.com' => {
                 '/foo/' => {
                     SID => {
-                        name  => "SID",
-                        value => "31d4d96e407aad42",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "www.example.com",
-                            hostonly         => 1,
-                            path             => "/foo/",
-                        },
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "www.example.com",
+                        hostonly         => 1,
+                        path             => "/foo/",
                     }
                 }
             },
@@ -105,15 +99,13 @@ my @cases = (
             'www.example.com' => {
                 '/foo' => {
                     SID => {
-                        name  => "SID",
-                        value => "31d4d96e407aad42",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "www.example.com",
-                            hostonly         => 1,
-                            path             => "/foo",
-                        },
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "www.example.com",
+                        hostonly         => 1,
+                        path             => "/foo",
                     }
                 }
             },
@@ -122,23 +114,18 @@ my @cases = (
     {
         label   => "last cookie wins",
         request => "http://example.com/",
-        cookies => [
-            "SID=31d4d96e407aad42",
-            "SID=0000000000000000",
-        ],
+        cookies => [ "SID=31d4d96e407aad42", "SID=0000000000000000", ],
         store   => {
             'example.com' => {
                 '/' => {
                     SID => {
-                        name  => "SID",
-                        value => "0000000000000000",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "example.com",
-                            hostonly         => 1,
-                            path             => "/",
-                        },
+                        name             => "SID",
+                        value            => "0000000000000000",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "example.com",
+                        hostonly         => 1,
+                        path             => "/",
                     }
                 }
             },
@@ -147,10 +134,7 @@ my @cases = (
     {
         label   => "expired supercedes prior",
         request => "http://example.com/",
-        cookies => [
-            "SID=31d4d96e407aad42",
-            "SID=0000000000000000; Max-Age=-60",
-        ],
+        cookies => [ "SID=31d4d96e407aad42", "SID=0000000000000000; Max-Age=-60", ],
         store   => {
             'example.com' => {
                 '/' => {},
@@ -160,36 +144,29 @@ my @cases = (
     {
         label   => "separated by path",
         request => "http://example.com/foo/bar",
-        cookies => [
-            "SID=31d4d96e407aad42; Path=/",
-            "SID=0000000000000000",
-        ],
+        cookies => [ "SID=31d4d96e407aad42; Path=/", "SID=0000000000000000", ],
         store   => {
             'example.com' => {
                 '/' => {
                     SID => {
-                        name  => "SID",
-                        value => "31d4d96e407aad42",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "example.com",
-                            hostonly         => 1,
-                            path             => "/",
-                        },
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "example.com",
+                        hostonly         => 1,
+                        path             => "/",
                     }
                 },
                 '/foo' => {
                     SID => {
-                        name  => "SID",
-                        value => "0000000000000000",
-                        attr  => {
-                            creation_time    => ignore(),
-                            last_access_time => ignore(),
-                            domain           => "example.com",
-                            hostonly         => 1,
-                            path             => "/foo",
-                        },
+                        name             => "SID",
+                        value            => "0000000000000000",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "example.com",
+                        hostonly         => 1,
+                        path             => "/foo",
                     }
                 }
             },
