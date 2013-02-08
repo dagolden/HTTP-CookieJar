@@ -14,15 +14,40 @@ sub new {
 sub add {
     my ( $self, $request, $cookie ) = @_;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
-    my $parse = _parse_cookie($cookie)
-      or return;
-    # check domain
-    my $domain = $parse->{attr}{domain} // $host;
-    return unless _domain_match( $host, $domain );
-    # check path
-    my $path = $parse->{attr}{path} // $request_path;
-    # XXX check path
-    $self->{store}{$domain}{$path}{ $parse->{name} } = $parse;
+    return unless my $parse = _parse_cookie($cookie);
+    my $name = $parse->{name};
+    # check and normalize domain
+    # XXX doesn't check for public suffixes; see Mozilla::PublicSuffix
+    if ( exists $parse->{attr}{domain} ) {
+        return unless _domain_match( $host, $parse->{attr}{domain} );
+        $parse->{attr}{hostonly} = 0;
+    }
+    else {
+        $parse->{attr}{domain}   = $host;
+        $parse->{attr}{hostonly} = 1;
+    }
+    my $domain = $parse->{attr}{domain};
+    # normalize path
+    if ( !exists $parse->{attr}{path} || substr( $parse->{attr}{path}, 0, 1 ) ne "/" ) {
+        $parse->{attr}{path} = _default_path($request_path);
+    }
+    my $path = $parse->{attr}{path};
+    # set timestamps and normalize expires
+    my $now = $parse->{attr}{creation_time} = $parse->{attr}{last_access_time} = time;
+    if ( exists $parse->{attr}{'max-age'} ) {
+        $parse->{expires} = $now + $parse->{attr}{'max-age'};
+    }
+    # update creation time from old cookie, if exists
+    if ( my $old = $self->{store}{$domain}{$path}{$name} ) {
+        $parse->{attr}{creation_time} = $old->{attr}{creation_time};
+    }
+    # if cookie has expired, purge any old matching cookie, too
+    if ( defined $parse->{expires} && $parse->{expires} < $now ) {
+        delete $self->{store}{$domain}{$path}{$name};
+    }
+    else {
+        $self->{store}{$domain}{$path}{$name} = $parse;
+    }
 }
 
 #--------------------------------------------------------------------------#
@@ -55,6 +80,24 @@ sub _domain_match {
     return unless $string =~ /[a-z]/i;                # non-numeric
     if ( $string =~ s{\Q$dom_string\E$}{} ) {
         return substr( $string, -1, 1 ) eq '.';       # "foo."
+    }
+    return;
+}
+
+sub _default_path {
+    my ($path) = @_;
+    return "/" if !length $path || substr( $path, 0, 1 ) ne "/";
+    my ($default) = $path =~ m{^(.*)/};               # greedy to last /
+    return length($default) ? $default : "/";
+}
+
+sub _path_match {
+    my ( $req_path, $cookie_path ) = @_;
+    return 1 if $req_path eq $cookie_path;
+    if ( $req_path =~ m{^\Q$cookie_path\E(.*)} ) {
+        my $rest = $1;
+        return 1 if substr( $cookie_path, -1, 1 ) eq '/';
+        return 1 if substr( $rest,        0,  1 ) eq '/';
     }
     return;
 }

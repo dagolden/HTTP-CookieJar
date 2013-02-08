@@ -6,14 +6,34 @@ use Test::Deep '!blessed';
 
 use HTTP::Cookies::Tiny;
 
-my $jar = new_ok("HTTP::Cookies::Tiny");
-
 my @cases = (
     {
         label   => "no cookies",
         request => "http://example.com/",
         cookies => [],
         store   => {},
+    },
+    {
+        label   => "simple key=value",
+        request => "http://example.com/",
+        cookies => ["SID=31d4d96e407aad42"],
+        store   => {
+            'example.com' => {
+                '/' => {
+                    SID => {
+                        name  => "SID",
+                        value => "31d4d96e407aad42",
+                        attr  => {
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "example.com",
+                            hostonly         => 1,
+                            path             => "/",
+                        },
+                    }
+                }
+            },
+        },
     },
     {
         label   => "invalid cookie not stored",
@@ -34,7 +54,7 @@ my @cases = (
         store   => {},
     },
     {
-        label   => "superdomain",
+        label   => "superdomain stored",
         request => "http://www.example.com/",
         cookies => ["SID=31d4d96e407aad42; Domain=example.com"],
         store   => {
@@ -44,7 +64,11 @@ my @cases = (
                         name  => "SID",
                         value => "31d4d96e407aad42",
                         attr  => {
-                            domain => "example.com",
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "example.com",
+                            hostonly         => 0,
+                            path             => "/",
                         },
                     }
                 }
@@ -52,48 +76,133 @@ my @cases = (
         },
     },
     {
-        label   => "simple key=value",
+        label   => "path prefix /foo/ stored",
+        request => "http://www.example.com/foo/bar",
+        cookies => ["SID=31d4d96e407aad42; Path=/foo/"],
+        store   => {
+            'www.example.com' => {
+                '/foo/' => {
+                    SID => {
+                        name  => "SID",
+                        value => "31d4d96e407aad42",
+                        attr  => {
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "www.example.com",
+                            hostonly         => 1,
+                            path             => "/foo/",
+                        },
+                    }
+                }
+            },
+        },
+    },
+    {
+        label   => "path prefix /foo stored",
+        request => "http://www.example.com/foo/bar",
+        cookies => ["SID=31d4d96e407aad42; Path=/foo"],
+        store   => {
+            'www.example.com' => {
+                '/foo' => {
+                    SID => {
+                        name  => "SID",
+                        value => "31d4d96e407aad42",
+                        attr  => {
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "www.example.com",
+                            hostonly         => 1,
+                            path             => "/foo",
+                        },
+                    }
+                }
+            },
+        },
+    },
+    {
+        label   => "last cookie wins",
         request => "http://example.com/",
-        cookies => ["SID=31d4d96e407aad42"],
+        cookies => [
+            "SID=31d4d96e407aad42",
+            "SID=0000000000000000",
+        ],
+        store   => {
+            'example.com' => {
+                '/' => {
+                    SID => {
+                        name  => "SID",
+                        value => "0000000000000000",
+                        attr  => {
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "example.com",
+                            hostonly         => 1,
+                            path             => "/",
+                        },
+                    }
+                }
+            },
+        },
+    },
+    {
+        label   => "expired supercedes prior",
+        request => "http://example.com/",
+        cookies => [
+            "SID=31d4d96e407aad42",
+            "SID=0000000000000000; Max-Age=-60",
+        ],
+        store   => {
+            'example.com' => {
+                '/' => {},
+            },
+        },
+    },
+    {
+        label   => "separated by path",
+        request => "http://example.com/foo/bar",
+        cookies => [
+            "SID=31d4d96e407aad42; Path=/",
+            "SID=0000000000000000",
+        ],
         store   => {
             'example.com' => {
                 '/' => {
                     SID => {
                         name  => "SID",
                         value => "31d4d96e407aad42",
-                        attr  => {},
+                        attr  => {
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "example.com",
+                            hostonly         => 1,
+                            path             => "/",
+                        },
+                    }
+                },
+                '/foo' => {
+                    SID => {
+                        name  => "SID",
+                        value => "0000000000000000",
+                        attr  => {
+                            creation_time    => ignore(),
+                            last_access_time => ignore(),
+                            domain           => "example.com",
+                            hostonly         => 1,
+                            path             => "/foo",
+                        },
                     }
                 }
             },
         },
     },
-##    {
-##        cookies => ["SID=31d4d96e407aad42; Path=/; Secure; HttpOnly"],
-##        store   => {},
-##    },
-##    {
-##        cookies => ["SID=31d4d96e407aad42; Path=/; Domain=example.com"],
-##        store   => {},
-##    },
-##    {
-##        cookies => ["SID=31d4d96e407aad42; Path=/; Domain="],
-##        store   => {},
-##    },
-##    {
-##        cookies => ["lang=en-US; Expires = Wed], 09 Jun 2021 10:18:14 GMT"],
-##        store   => {},
-##    },
-##    {
-##        cookies => ["lang=en-US; Expires = Wed], 09 Jun 2021 10:18:14 GMT; Max-Age=3600"],
-##        store   => {},
-##    },
 );
 
 for my $c (@cases) {
+    my $jar = HTTP::Cookies::Tiny->new;
     for my $cookie ( @{ $c->{cookies} } ) {
         $jar->add( $c->{request}, $cookie );
     }
-    cmp_deeply $jar->{store}, $c->{store}, $c->{label};
+    cmp_deeply $jar->{store}, $c->{store}, $c->{label} or diag explain $jar->{store};
 }
 
 done_testing;
