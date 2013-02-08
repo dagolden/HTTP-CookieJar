@@ -6,8 +6,6 @@ use Test::Deep '!blessed';
 
 use HTTP::Cookies::Tiny;
 
-my $jar = new_ok("HTTP::Cookies::Tiny");
-
 my @cases = (
     {
         cookie => "",
@@ -30,6 +28,7 @@ my @cases = (
         parse  => {
             name  => "SID",
             value => "31d4d96e407aad42",
+            attr => {},
         }
     },
     {
@@ -37,6 +36,7 @@ my @cases = (
         parse  => {
             name  => "SID",
             value => "31d4d96e407aad42",
+            attr => {},
         }
     },
     {
@@ -52,6 +52,16 @@ my @cases = (
         }
     },
     {
+        cookie => "SID=31d4d96e407aad42; Domain=.example.com",
+        parse  => {
+            name  => "SID",
+            value => "31d4d96e407aad42",
+            attr  => {
+                domain => "example.com",
+            },
+        }
+    },
+    {
         cookie => "SID=31d4d96e407aad42; Path=/; Domain=example.com",
         parse  => {
             name  => "SID",
@@ -63,20 +73,41 @@ my @cases = (
         }
     },
     {
+        cookie => "SID=31d4d96e407aad42; Path=/; Domain=",
+        parse  => {
+            name  => "SID",
+            value => "31d4d96e407aad42",
+            attr  => {
+                path   => "/",
+            },
+        }
+    },
+    {
         cookie => "lang=en-US; Expires = Wed, 09 Jun 2021 10:18:14 GMT",
         parse  => {
             name  => "lang",
             value => "en-US",
             attr  => {
-                expires => "Wed, 09 Jun 2021 10:18:14 GMT",
+                expires => 1623233894,
+            },
+        }
+    },
+    {
+        cookie => "lang=en-US; Expires = Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=3600",
+        parse  => {
+            name  => "lang",
+            value => "en-US",
+            attr  => {
+                expires => 1623233894,
+                'max-age' => 3600,
             },
         }
     },
 );
 
 for my $c (@cases) {
-    my $got = $jar->_parse( $c->{cookie} );
-    cmp_deeply $got, $c->{parse}, "Set-Cookie: $c->{cookie}";
+    my $got = HTTP::Cookies::Tiny::_parse_cookie( $c->{cookie} );
+    cmp_deeply $got, $c->{parse}, $c->{cookie} || q{''};
 }
 
 done_testing;
