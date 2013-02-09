@@ -90,6 +90,23 @@ sub cookie_header {
     return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($req) );
 }
 
+sub all_cookies {
+    my ($self) = @_;
+    my $store = $self->{store};
+    my @found;
+    for my $cookie_domain ( keys %$store ) {
+        my $domain_set = $store->{$cookie_domain};
+        for my $cookie_path ( keys %$domain_set ) {
+            my $path_set = $domain_set->{$cookie_path};
+            for my $name ( keys %$path_set ) {
+                my $cookie = $path_set->{$name};
+                push @found, $cookie;
+            }
+        }
+    }
+    return @found;
+}
+
 #--------------------------------------------------------------------------#
 # Helper subroutines
 #--------------------------------------------------------------------------#
