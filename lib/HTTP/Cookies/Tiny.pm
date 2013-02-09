@@ -57,6 +57,7 @@ sub add {
 
 sub cookies_for {
     my ( $self, $request ) = @_;
+    return unless length $request;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
 
     my @found;
@@ -84,8 +85,9 @@ sub cookies_for {
 }
 
 sub cookie_header {
-    my ( $self, $request ) = @_;
-    return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($request) );
+    my ( $self, $req ) = @_;
+    return unless length $req;
+    return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($req) );
 }
 
 #--------------------------------------------------------------------------#
@@ -183,7 +185,7 @@ sub _parse_http_date {
 }
 
 sub _split_url {
-    my $url = pop;
+    my $url = shift;
 
     # URI regex adapted from the URI module
     # XXX path_query here really chops at ? or # to get just the path and not the query

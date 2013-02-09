@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Test::More 0.96;
 use Test::Deep '!blessed';
+use Time::Mock;
 
 use HTTP::Cookies::Tiny;
 
@@ -10,33 +11,34 @@ my @cases = (
     {
         label   => "path length",
         request => "http://example.com/foo/bar/",
-        sleep => 0,
         cookies => [
-            "SID=2; Path=/",
-            "SID=1; Path=/foo",
-            "SID=0; Path=/foo/bar",
+            [ "http://example.com/foo/bar/", "SID=2; Path=/" ],
+            [ "http://example.com/foo/bar/", "SID=1; Path=/foo" ],
+            [ "http://example.com/foo/bar/", "SID=0; Path=/foo/bar" ],
         ],
     },
     {
-        label   => "creation date",
-        request => "http://example.com/foo/bar/",
-        sleep => 2,
+        label   => "creation time",
+        request => "http://foo.bar.baz.example.com/",
         cookies => [
-            "SID=1; Path=/",
-            "SID=0; Path=/",
+            [ "http://foo.bar.baz.example.com/", "SID=0; Path=/; Domain=bar.baz.example.com" ],
+            [ "http://foo.bar.baz.example.com/", "SID=1; Path=/; Domain=baz.example.com" ],
+            [ "http://foo.bar.baz.example.com/", "SID=2; Path=/; Domain=example.com" ],
         ],
     },
 );
 
 for my $c (@cases) {
     my $jar = HTTP::Cookies::Tiny->new;
+    my $offset = 0;
     for my $cookie ( @{ $c->{cookies} } ) {
-        $jar->add( $c->{request}, $cookie );
-        sleep $c->{sleep} if $c->{sleep};
+        Time::Mock->offset($offset);
+        $jar->add(@$cookie);
+        $offset+=10;
     }
     my @cookies = $jar->cookies_for( $c->{request} );
     my @vals = map { $_->{value} } @cookies;
-    cmp_deeply \@vals, [0 .. $#vals], $c->{label} or diag explain \@cookies;
+    cmp_deeply \@vals, [ 0 .. $#vals ], $c->{label} or diag explain \@cookies;
 }
 
 done_testing;
