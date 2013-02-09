@@ -13,7 +13,10 @@ my @cases = (
     },
     {
         cookie => "SID=",
-        parse  => undef,
+        parse  => {
+            name  => "SID",
+            value => "",
+        }
     },
     {
         cookie => "=31d4d96e407aad42",

@@ -11,6 +11,11 @@ sub new {
     bless { store => {} }, $class;
 }
 
+sub clear {
+    my ($self) = @_;
+    $self->{store} = {};
+}
+
 sub add {
     my ( $self, $request, $cookie ) = @_;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
@@ -78,6 +83,11 @@ sub cookies_for {
     } @found;
 }
 
+sub cookie_header {
+    my ( $self, $request ) = @_;
+    return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($request) );
+}
+
 #--------------------------------------------------------------------------#
 # Helper subroutines
 #--------------------------------------------------------------------------#
@@ -86,8 +96,8 @@ sub _parse_cookie {
     my ($cookie) = @_;
     my ( $kvp, @attrs ) = split /;/, $cookie // '';
     my ( $name, $value ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '';
-    return unless length $name && length $value;
-    my $parse = { name => $name, value => $value };
+    return unless length $name;
+    my $parse = { name => $name, value => $value // "" };
     for my $s (@attrs) {
         next unless defined $s && $s =~ /\S/;
         my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $s;

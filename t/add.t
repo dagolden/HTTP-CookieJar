@@ -36,7 +36,7 @@ my @cases = (
     {
         label   => "invalid cookie not stored",
         request => "http://example.com/",
-        cookies => ["SID="],
+        cookies => [";"],
         store   => {},
     },
     {
