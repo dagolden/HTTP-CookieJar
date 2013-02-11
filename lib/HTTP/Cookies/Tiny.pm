@@ -19,7 +19,6 @@ sub clear {
 sub add {
     my ( $self, $request, $cookie ) = @_;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
-    $request_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
 
     return unless my $parse = _parse_cookie($cookie);
     my $name = $parse->{name};
@@ -61,7 +60,6 @@ sub cookies_for {
     my ( $self, $request ) = @_;
     return unless length $request;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
-    $request_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
 
     my @found;
     my $now   = time;
@@ -202,6 +200,7 @@ sub _split_url {
 
     $scheme = lc $scheme;
     $path_query = "/$path_query" unless $path_query =~ m<\A/>;
+    $path_query =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
 
     my $host = ( length($authority) ) ? lc $authority : 'localhost';
     $host =~ s/\A[^@]*@//; # userinfo
