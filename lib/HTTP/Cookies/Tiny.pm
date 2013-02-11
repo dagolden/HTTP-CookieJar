@@ -63,21 +63,13 @@ sub cookies_for {
 
     my @found;
     my $now   = time;
-    my $store = $self->{store};
-    for my $cookie_domain ( keys %$store ) {
-        next unless _domain_match( $host, $cookie_domain );
-        my $domain_set = $store->{$cookie_domain};
-        for my $cookie_path ( keys %$domain_set ) {
-            next unless _path_match( $request_path, $cookie_path );
-            my $path_set = $domain_set->{$cookie_path};
-            for my $name ( keys %$path_set ) {
-                my $cookie = $path_set->{$name};
-                next if $cookie->{hostonly}           && $host ne $cookie_domain;
-                next if $cookie->{secure}             && $scheme ne 'https';
-                next if defined( $cookie->{expires} ) && $cookie->{expires} < $now;
-                push @found, $cookie;
-            }
-        }
+    for my $cookie ( $self->all_cookies ) {
+        next if $cookie->{hostonly}           && $host ne $cookie->{domain};
+        next if $cookie->{secure}             && $scheme ne 'https';
+        next if defined( $cookie->{expires} ) && $cookie->{expires} < $now;
+        next unless _domain_match( $host, $cookie->{domain} );
+        next unless _path_match( $request_path, $cookie->{path} );
+        push @found, $cookie;
     }
     return sort {
         length( $b->{path} ) <=> length( $a->{path} )
