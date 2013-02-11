@@ -19,6 +19,8 @@ sub clear {
 sub add {
     my ( $self, $request, $cookie ) = @_;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
+    $request_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+
     return unless my $parse = _parse_cookie($cookie);
     my $name = $parse->{name};
     # check and normalize domain
@@ -59,6 +61,7 @@ sub cookies_for {
     my ( $self, $request ) = @_;
     return unless length $request;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
+    $request_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
 
     my @found;
     my $now   = time;
@@ -126,6 +129,7 @@ sub _parse_cookie {
         $v = _parse_http_date($v) if $k eq 'expires'; # convert to epoch
         next unless length $v;
         $v =~ s{^\.}{} if $k eq 'domain';             # strip leading dot
+        $v =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if $k eq 'path'; # unescape
         $parse->{$k} = $v;
     }
     return $parse;
