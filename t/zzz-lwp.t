@@ -201,7 +201,7 @@ ok(!$cookie);
 #       Shopping basket contains an item.
 
 $cookie = interact($c, 'http://www.acme.com/acme/pickitem',
-		       'Part_Number=Rocket_Launcher_0001; Path=/acme');
+                       'Part_Number=Rocket_Launcher_0001; Path=/acme');
 is($cookie, "Customer=WILE_E_COYOTE");
 
 #
@@ -223,7 +223,7 @@ is($cookie, "Customer=WILE_E_COYOTE");
 #       New cookie reflects shipping method.
 
 $cookie = interact($c, "http://www.acme.com/acme/shipping",
-		   'Shipping=FedEx; Path=/acme');
+                   'Shipping=FedEx; Path=/acme');
 
 like($cookie, qr/Part_Number=Rocket_Launcher_0001;/);
 like($cookie, qr/Customer=WILE_E_COYOTE/ );
@@ -260,114 +260,118 @@ like($cookie, qr/WILE_E_COYOTE/);
 ##print $c->as_string;
 
 
-### 5.2  Example 2
-###
-### This example illustrates the effect of the Path attribute.  All detail
-### of request and response headers has been omitted.  Assume the user agent
-### has no stored cookies.
-##
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##
-### Imagine the user agent has received, in response to earlier requests,
-### the response headers
-###
-### Set-Cookie2: Part_Number="Rocket_Launcher_0001"; Version="1";
-###         Path="/acme"
-###
-### and
-###
-### Set-Cookie2: Part_Number="Riding_Rocket_0023"; Version="1";
-###         Path="/acme/ammo"
-##
-##interact($c, "http://www.acme.com/acme/ammo/specific",
-##             'Part_Number="Rocket_Launcher_0001"; Version="1"; Path="/acme"',
-##             'Part_Number="Riding_Rocket_0023"; Version="1"; Path="/acme/ammo"');
-##
-### A subsequent request by the user agent to the (same) server for URLs of
-### the form /acme/ammo/...  would include the following request header:
-###
-### Cookie: $Version="1";
-###         Part_Number="Riding_Rocket_0023"; $Path="/acme/ammo";
-###         Part_Number="Rocket_Launcher_0001"; $Path="/acme"
-###
-### Note that the NAME=VALUE pair for the cookie with the more specific Path
-### attribute, /acme/ammo, comes before the one with the less specific Path
-### attribute, /acme.  Further note that the same cookie name appears more
-### than once.
-##
-##$cookie = interact($c, "http://www.acme.com/acme/ammo/...");
-##ok($cookie =~ /Riding_Rocket_0023.*Rocket_Launcher_0001/);
-##
-### A subsequent request by the user agent to the (same) server for a URL of
-### the form /acme/parts/ would include the following request header:
-###
-### Cookie: $Version="1"; Part_Number="Rocket_Launcher_0001"; $Path="/acme"
-###
-### Here, the second cookie's Path attribute /acme/ammo is not a prefix of
-### the request URL, /acme/parts/, so the cookie does not get forwarded to
-### the server.
-##
-##$cookie = interact($c, "http://www.acme.com/acme/parts/");
-##ok($cookie =~ /Rocket_Launcher_0001/);
-##ok($cookie !~ /Riding_Rocket_0023/);
-##
-####print $c->as_string;
-##
-###-----------------------------------------------------------------------
-##
-### Test rejection of Set-Cookie2 responses based on domain, path or port
-##
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##
+# 5.2  Example 2
+#
+# This example illustrates the effect of the Path attribute.  All detail
+# of request and response headers has been omitted.  Assume the user agent
+# has no stored cookies.
+
+$c = HTTP::Cookies::Tiny::LWP->new;
+
+# Imagine the user agent has received, in response to earlier requests,
+# the response headers
+#
+# Set-Cookie2: Part_Number="Rocket_Launcher_0001"; Version="1";
+#         Path="/acme"
+#
+# and
+#
+# Set-Cookie2: Part_Number="Riding_Rocket_0023"; Version="1";
+#         Path="/acme/ammo"
+
+interact($c, "http://www.acme.com/acme/ammo/specific",
+             'Part_Number=Rocket_Launcher_0001; Path=/acme',
+             'Part_Number=Riding_Rocket_0023; Path=/acme/ammo');
+
+# A subsequent request by the user agent to the (same) server for URLs of
+# the form /acme/ammo/...  would include the following request header:
+#
+# Cookie: $Version="1";
+#         Part_Number="Riding_Rocket_0023"; $Path="/acme/ammo";
+#         Part_Number="Rocket_Launcher_0001"; $Path="/acme"
+#
+# Note that the NAME=VALUE pair for the cookie with the more specific Path
+# attribute, /acme/ammo, comes before the one with the less specific Path
+# attribute, /acme.  Further note that the same cookie name appears more
+# than once.
+
+$cookie = interact($c, "http://www.acme.com/acme/ammo/...");
+like($cookie, qr/Riding_Rocket_0023.*Rocket_Launcher_0001/);
+
+# A subsequent request by the user agent to the (same) server for a URL of
+# the form /acme/parts/ would include the following request header:
+#
+# Cookie: $Version="1"; Part_Number="Rocket_Launcher_0001"; $Path="/acme"
+#
+# Here, the second cookie's Path attribute /acme/ammo is not a prefix of
+# the request URL, /acme/parts/, so the cookie does not get forwarded to
+# the server.
+
+$cookie = interact($c, "http://www.acme.com/acme/parts/");
+ok($cookie =~ /Rocket_Launcher_0001/);
+ok($cookie !~ /Riding_Rocket_0023/);
+
+##print $c->as_string;
+
+#-----------------------------------------------------------------------
+
+# Test rejection of Set-Cookie2 responses based on domain, path or port
+
+$c = HTTP::Cookies::Tiny::LWP->new;
+
+# XXX RFC 6265 says strip leading dots and embedded dots in prefix are OK
 ### illegal domain (no embedded dots)
-##$cookie = interact($c, "http://www.acme.com", 'foo=bar; domain=".com"');
+##$cookie = interact($c, "http://www.acme.com", 'foo=bar; domain=.com');
 ##is(count_cookies($c), 0);
-##
-### legal domain
-##$cookie = interact($c, "http://www.acme.com", 'foo=bar; domain="acme.com"');
-##is(count_cookies($c), 1);
-##
-### illegal domain (host prefix "www.a" contains a dot)
-##$cookie = interact($c, "http://www.a.acme.com", 'foo=bar; domain="acme.com"');
-##is(count_cookies($c), 1);
-##
-### legal domain
-##$cookie = interact($c, "http://www.a.acme.com", 'foo=bar; domain=".a.acme.com"');
-##is(count_cookies($c), 2);
-##
-### can't use a IP-address as domain
-##$cookie = interact($c, "http://125.125.125.125", 'foo=bar; domain="125.125.125"');
-##is(count_cookies($c), 2);
-##
+
+# legal domain
+$cookie = interact($c, "http://www.acme.com", 'foo=bar; domain=acme.com');
+is(count_cookies($c), 1);
+
+# illegal domain (host prefix "www.a" contains a dot)
+$cookie = interact($c, "http://www.a.acme.com", 'foo=bar; domain=acme.com');
+is(count_cookies($c), 1);
+
+# legal domain
+$cookie = interact($c, "http://www.a.acme.com", 'foo=bar; domain=.a.acme.com');
+is(count_cookies($c), 2);
+
+# can't use a IP-address as domain
+$cookie = interact($c, "http://125.125.125.125", 'foo=bar; domain=125.125.125');
+is(count_cookies($c), 2);
+
+# XXX RFC 6265 doesn't prohibit this; path matching happens on cookie header generation
 ### illegal path (must be prefix of request path)
-##$cookie = interact($c, "http://www.sol.no", 'foo=bar; domain=".sol.no"; path="/foo"');
+##$cookie = interact($c, "http://www.sol.no", 'foo=bar; domain=.sol.no; path=/foo');
 ##is(count_cookies($c), 2);
-##
-### legal path
-##$cookie = interact($c, "http://www.sol.no/foo/bar", 'foo=bar; domain=".sol.no"; path="/foo"');
-##is(count_cookies($c), 3);
-##
+
+# legal path
+$cookie = interact($c, "http://www.sol.no/foo/bar", 'foo=bar; domain=.sol.no; path=/foo');
+is(count_cookies($c), 3);
+
+# XXX ports not part of RFC 6265 standard
 ### illegal port (request-port not in list)
-##$cookie = interact($c, "http://www.sol.no", 'foo=bar; domain=".sol.no"; port="90,100"');
+##$cookie = interact($c, "http://www.sol.no", 'foo=bar; domain=.sol.no; port=90,100');
 ##is(count_cookies($c), 3);
-##
-### legal port
-##$cookie = interact($c, "http://www.sol.no", 'foo=bar; domain=".sol.no"; port="90,100, 80,8080"; max-age=100; Comment = "Just kidding! (\"|\\\\) "');
-##is(count_cookies($c), 4);
-##
-### port attribute without any value (current port)
-##$cookie = interact($c, "http://www.sol.no", 'foo9=bar; domain=".sol.no"; port; max-age=100;');
-##is(count_cookies($c), 5);
-##
-### encoded path
-##$cookie = interact($c, "http://www.sol.no/foo/", 'foo8=bar; path="/%66oo"');
-##is(count_cookies($c), 6);
-##
+
+# legal port
+$cookie = interact($c, "http://www.sol.no", 'foo=bar; domain=.sol.no; port=90,100, 80,8080; max-age=100; Comment = "Just kidding! (\"|\\\\) "');
+is(count_cookies($c), 4);
+
+# port attribute without any value (current port)
+$cookie = interact($c, "http://www.sol.no", 'foo9=bar; domain=.sol.no; port; max-age=100;');
+is(count_cookies($c), 5) or diag explain $c;
+
+# encoded path
+$cookie = interact($c, "http://www.sol.no/foo/", 'foo8=bar; path=/%66oo');
+is(count_cookies($c), 6);
+
+# XXX not doing save/load
 ##my $file = "lwp-cookies-$$.txt";
 ##$c->save($file);
 ##$old = $c->as_string;
 ##undef($c);
-##
+
 ##$c = HTTP::Cookies::Tiny::LWP->new;
 ##$c->load($file);
 ##unlink($file) || warn "Can't unlink $file: $!";
@@ -375,24 +379,20 @@ like($cookie, qr/WILE_E_COYOTE/);
 ##is($old, $c->as_string);
 ##
 ##undef($c);
-##
-###
-### Try some URL encodings of the PATHs
-###
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##interact($c, "http://www.acme.com/foo%2f%25/%40%40%0Anew%E5/%E5", 'foo  =   bar; version    =   1');
-####print $c->as_string;
-##
-##$cookie = interact($c, "http://www.acme.com/foo%2f%25/@@%0anewå/æøå", "bar=baz; path=\"/foo/\"; version=1");
-##ok($cookie =~ /foo=bar/);
-##ok($cookie =~ /^\$version=\"?1\"?/i);
-##
-##$cookie = interact($c, "http://www.acme.com/foo/%25/@@%0anewå/æøå");
-##ok(!$cookie);
-##
-##undef($c);
-##
-###
+
+#
+# Try some URL encodings of the PATHs
+#
+$c = HTTP::Cookies::Tiny::LWP->new;
+interact($c, "http://www.acme.com/foo%2f%25/%40%40%0Anew%E5/%E5", 'foo  =   bar');
+##print $c->as_string;
+$cookie = interact($c, "http://www.acme.com/foo%2f%25/@@%0anewå/æøå", "bar=baz; path=/foo/");
+ok($cookie =~ /foo=bar/);
+$cookie = interact($c, "http://www.acme.com/foo/%25/@@%0anewå/æøå");
+ok($cookie);
+undef($c);
+
+#
 ### Try to use the Netscape cookie file format for saving
 ###
 ##$file = "cookies-$$.txt";
@@ -459,7 +459,7 @@ like($cookie, qr/WILE_E_COYOTE/);
 ### Test for empty path
 ### Broken web-server ORION/1.3.38 returns to the client response like
 ###
-###	Set-Cookie: JSESSIONID=ABCDERANDOM123; Path=
+###     Set-Cookie: JSESSIONID=ABCDERANDOM123; Path=
 ###
 ### e.g. with Path set to nothing.
 ### In this case routine extract_cookies() must set cookie to / (root)
