@@ -94,20 +94,7 @@ sub cookie_header {
 }
 
 sub all_cookies {
-    my ($self) = @_;
-    my $store = $self->{store};
-    my @found;
-    for my $cookie_domain ( keys %$store ) {
-        my $domain_set = $store->{$cookie_domain};
-        for my $cookie_path ( keys %$domain_set ) {
-            my $path_set = $domain_set->{$cookie_path};
-            for my $name ( keys %$path_set ) {
-                my $cookie = $path_set->{$name};
-                push @found, $cookie;
-            }
-        }
-    }
-    return @found;
+    return map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
 }
 
 #--------------------------------------------------------------------------#
@@ -128,8 +115,8 @@ sub _parse_cookie {
         $v = 1 if $k =~ m/^(?:httponly|secure)$/; # boolean flag if present
         $v = _parse_http_date($v) if $k eq 'expires'; # convert to epoch
         next unless length $v;
-        $v =~ s{^\.}{} if $k eq 'domain';             # strip leading dot
-        $v =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if $k eq 'path'; # unescape
+        $v =~ s{^\.}{}                            if $k eq 'domain'; # strip leading dot
+        $v =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if $k eq 'path';   # unescape
         $parse->{$k} = $v;
     }
     return $parse;
@@ -138,9 +125,9 @@ sub _parse_cookie {
 sub _domain_match {
     my ( $string, $dom_string ) = @_;
     return 1 if $dom_string eq $string;
-    return unless $string =~ /[a-z]/i;                # non-numeric
+    return unless $string =~ /[a-z]/i;                               # non-numeric
     if ( $string =~ s{\Q$dom_string\E$}{} ) {
-        return substr( $string, -1, 1 ) eq '.';       # "foo."
+        return substr( $string, -1, 1 ) eq '.';                      # "foo."
     }
     return;
 }
@@ -148,7 +135,7 @@ sub _domain_match {
 sub _default_path {
     my ($path) = @_;
     return "/" if !length $path || substr( $path, 0, 1 ) ne "/";
-    my ($default) = $path =~ m{^(.*)/};               # greedy to last /
+    my ($default) = $path =~ m{^(.*)/};                              # greedy to last /
     return length($default) ? $default : "/";
 }
 
