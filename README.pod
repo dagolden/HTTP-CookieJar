@@ -1,0 +1,60 @@
+=pod
+
+=head1 NAME
+
+HTTP::Cookies::Tiny - A tiny HTTP cookie jar
+
+=head1 VERSION
+
+version 0.001
+
+=head1 SYNOPSIS
+
+  use HTTP::Cookies::Tiny;
+
+=head1 DESCRIPTION
+
+This module might be cool, but you'd never know it from the lack
+of documentation.
+
+=for Pod::Coverage method_names_here
+
+=head1 USAGE
+
+Good luck!
+
+=head1 SEE ALSO
+
+Maybe other modules do related things.
+
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests through the issue tracker
+at L<https://github.com/dagolden/http-cookies-tiny/issues>.
+You will be notified automatically of any progress on your issue.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<https://github.com/dagolden/http-cookies-tiny>
+
+  git clone git://github.com/dagolden/http-cookies-tiny.git
+
+=head1 AUTHOR
+
+David Golden <dagolden@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2013 by David Golden.
+
+This is free software, licensed under:
+
+  The Apache License, Version 2.0, January 2004
+
