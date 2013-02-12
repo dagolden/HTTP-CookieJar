@@ -94,12 +94,12 @@ sub all_cookies {
 sub _parse_cookie {
     my ($cookie) = @_;
     my ( $kvp, @attrs ) = split /;/, $cookie // '';
-    my ( $name, $value ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '';
+    my ( $name, $value ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '', 2;
     return unless length $name;
     my $parse = { name => $name, value => $value // "" };
     for my $s (@attrs) {
         next unless defined $s && $s =~ /\S/;
-        my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $s;
+        my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $s, 2;
         $k = lc $k;
         next unless $k =~ m/^(?:domain|path|expires|max-age|httponly|secure)$/;
         $v = 1 if $k =~ m/^(?:httponly|secure)$/; # boolean flag if present

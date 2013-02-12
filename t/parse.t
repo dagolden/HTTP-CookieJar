@@ -34,6 +34,13 @@ my @cases = (
         }
     },
     {
+        cookie => "SID=ID=31d4d96e407aad42",
+        parse  => {
+            name  => "SID",
+            value => "ID=31d4d96e407aad42",
+        }
+    },
+    {
         cookie => "SID=31d4d96e407aad42 ; ; ; ",
         parse  => {
             name  => "SID",
