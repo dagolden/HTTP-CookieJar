@@ -62,7 +62,7 @@ sub cookies_for {
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
 
     my @found;
-    my $now   = time;
+    my $now = time;
     for my $cookie ( $self->all_cookies ) {
         next if $cookie->{hostonly}           && $host ne $cookie->{domain};
         next if $cookie->{secure}             && $scheme ne 'https';
@@ -85,6 +85,24 @@ sub cookie_header {
 
 sub all_cookies {
     return map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
+}
+
+# generate as list that can be fed back in to add
+sub as_list {
+    my ( $self, $args ) = @_;
+    my @list;
+    for my $c ( $self->all_cookies ) {
+        next if $args->{persistent} && !defined $c->{expires};
+        my @parts = "$c->{name}=$c->{value}";
+        for my $attr (qw/Domain Path Expires/) {
+            push @parts, "$attr=$c->{lc $attr}" if defined $c->{ lc $attr };
+        }
+        for my $attr (qw/Secure HttpOnly/) {
+            push @parts, $attr if $c->{ lc $attr };
+        }
+        push @list, join( "; ", @parts );
+    }
+    return @list;
 }
 
 #--------------------------------------------------------------------------#
