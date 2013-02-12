@@ -52,7 +52,7 @@ $req->header("Host", "www.acme.com:80");
 $res = HTTP::Response->new(200, "OK");
 $res->request($req);
 $res->header("Set-Cookie" => "CUSTOMER=WILE_E_COYOTE; path=/ ; expires=Wednesday, 09-Nov-$year_plus_one 23:12:40 GMT");
-#print $res->as_string;
+#;
 $c->extract_cookies($res);
 
 $req = HTTP::Request->new(GET => "http://www.acme.com/");
@@ -257,7 +257,7 @@ like($cookie, qr/WILE_E_COYOTE/);
 # /acme as a prefix, and that matches the Path attribute, each request
 # contains all the cookies received so far.
 
-##print $c->as_string;
+##;
 
 
 # 5.2  Example 2
@@ -311,7 +311,7 @@ $cookie = interact($c, "http://www.acme.com/acme/parts/");
 ok($cookie =~ /Rocket_Launcher_0001/);
 ok($cookie !~ /Riding_Rocket_0023/);
 
-##print $c->as_string;
+##;
 
 #-----------------------------------------------------------------------
 
@@ -385,7 +385,7 @@ is(count_cookies($c), 6);
 #
 $c = HTTP::Cookies::Tiny::LWP->new;
 interact($c, "http://www.acme.com/foo%2f%25/%40%40%0Anew%E5/%E5", 'foo  =   bar');
-##print $c->as_string;
+##;
 $cookie = interact($c, "http://www.acme.com/foo%2f%25/@@%0anewå/æøå", "bar=baz; path=/foo/");
 ok($cookie =~ /foo=bar/);
 $cookie = interact($c, "http://www.acme.com/foo/%25/@@%0anewå/æøå");
@@ -409,89 +409,83 @@ undef($c);
 ##ok($c->as_string =~ /foo1=bar/);
 ##undef($c);
 ##unlink($file);
-##
-##
-###
-### Some additional Netscape cookies test
-###
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$req = HTTP::Request->new(POST => "http://foo.bar.acme.com/foo");
-##
-### Netscape allows a host part that contains dots
-##$res = HTTP::Response->new(200, "OK");
-##$res->header(set_cookie => 'Customer=WILE_E_COYOTE; domain=.acme.com');
-##$res->request($req);
-##$c->extract_cookies($res);
-##
-### and that the domain is the same as the host without adding a leading
-### dot to the domain.  Should not quote even if strange chars are used
-### in the cookie value.
-##$res = HTTP::Response->new(200, "OK");
-##$res->header(set_cookie => 'PART_NUMBER=3,4; domain=foo.bar.acme.com');
-##$res->request($req);
-##$c->extract_cookies($res);
-##
-##print $c->as_string;
-##
-##require URI;
-##$req = HTTP::Request->new(POST => URI->new("http://foo.bar.acme.com/foo"));
-##$c->add_cookie_header($req);
-###print $req->as_string;
-##ok($req->header("Cookie") =~ /PART_NUMBER=3,4/);
-##ok($req->header("Cookie") =~ /Customer=WILE_E_COYOTE/);
-##
-##
-### Test handling of local intranet hostnames without a dot
+
+
+#
+# Some additional Netscape cookies test
+#
+$c = HTTP::Cookies::Tiny::LWP->new;
+$req = HTTP::Request->new(POST => "http://foo.bar.acme.com/foo");
+
+# Netscape allows a host part that contains dots
+$res = HTTP::Response->new(200, "OK");
+$res->header(set_cookie => 'Customer=WILE_E_COYOTE; domain=.acme.com');
+$res->request($req);
+$c->extract_cookies($res);
+
+# and that the domain is the same as the host without adding a leading
+# dot to the domain.  Should not quote even if strange chars are used
+# in the cookie value.
+$res = HTTP::Response->new(200, "OK");
+$res->header(set_cookie => 'PART_NUMBER=3,4; domain=foo.bar.acme.com');
+$res->request($req);
+$c->extract_cookies($res);
+
+##;
+
+require URI;
+$req = HTTP::Request->new(POST => URI->new("http://foo.bar.acme.com/foo"));
+$c->add_cookie_header($req);
+#;
+ok($req->header("Cookie") =~ /PART_NUMBER=3,4/);
+ok($req->header("Cookie") =~ /Customer=WILE_E_COYOTE/);
+
+
+# XXX the .local mechanism is not in RFC 6265
+# Test handling of local intranet hostnames without a dot
 ##$c->clear;
 ##print "---\n";
 ##
 ##interact($c, "http://example/", "foo1=bar; PORT; Discard;");
-##$_=interact($c, "http://example/", 'foo2=bar; domain=".local"');
-##ok(/foo1=bar/);
+##$cookie=interact($c, "http://example/", 'foo2=bar; domain=".local"');
+##like($cookie, qr/foo1=bar/);
 ##
-##$_=interact($c, "http://example/", 'foo3=bar');
-##$_=interact($c, "http://example/");
-##print "Cookie: $_\n";
-##ok(/foo2=bar/);
+##$cookie=interact($c, "http://example/", 'foo3=bar');
+##$cookie=interact($c, "http://example/");
+##like($cookie, qr/foo2=bar/);
 ##is(count_cookies($c), 3);
-##print $c->as_string;
-##
-### Test for empty path
-### Broken web-server ORION/1.3.38 returns to the client response like
-###
-###     Set-Cookie: JSESSIONID=ABCDERANDOM123; Path=
-###
-### e.g. with Path set to nothing.
-### In this case routine extract_cookies() must set cookie to / (root)
-##print "---\n";
-##print "Test for empty path...\n";
-##$c = HTTP::Cookies::Tiny::LWP->new;  # clear it
-##
-##$req = HTTP::Request->new(GET => "http://www.ants.com/");
-##
-##$res = HTTP::Response->new(200, "OK");
-##$res->request($req);
-##$res->header("Set-Cookie" => "JSESSIONID=ABCDERANDOM123; Path=");
-##print $res->as_string;
-##$c->extract_cookies($res);
-###print $c->as_string;
-##
-##$req = HTTP::Request->new(GET => "http://www.ants.com/");
-##$c->add_cookie_header($req);
-###print $req->as_string;
-##
-##is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
-##is($req->header("Cookie2"), "\$Version=\"1\"");
-##
-##
-### missing path in the request URI
-##$req = HTTP::Request->new(GET => URI->new("http://www.ants.com:8080"));
-##$c->add_cookie_header($req);
-###print $req->as_string;
-##
-##is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
-##is($req->header("Cookie2"), "\$Version=\"1\"");
-##
+
+
+
+# Test for empty path
+# Broken web-server ORION/1.3.38 returns to the client response like
+#
+#     Set-Cookie: JSESSIONID=ABCDERANDOM123; Path=
+#
+# e.g. with Path set to nothing.
+# In this case routine extract_cookies() must set cookie to / (root)
+
+$c = HTTP::Cookies::Tiny::LWP->new;  # clear it
+
+$req = HTTP::Request->new(GET => "http://www.ants.com/");
+
+$res = HTTP::Response->new(200, "OK");
+$res->request($req);
+$res->header("Set-Cookie" => "JSESSIONID=ABCDERANDOM123; Path=");
+$c->extract_cookies($res);
+
+$req = HTTP::Request->new(GET => "http://www.ants.com/");
+$c->add_cookie_header($req);
+
+is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
+
+# missing path in the request URI
+$req = HTTP::Request->new(GET => URI->new("http://www.ants.com:8080"));
+$c->add_cookie_header($req);
+
+is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
+
+# XXX we don't support Cookie2
 ### test mixing of Set-Cookie and Set-Cookie2 headers.
 ### Example from http://www.trip.com/trs/trip/flighttracker/flight_tracker_home.xsl
 ### which gives up these headers:
@@ -517,16 +511,17 @@ undef($c);
 ##$res->push_header("Set-Cookie"  => qq(trip.appServer=1111-0000-x-024;Domain=.trip.com;Path=/));
 ##$res->push_header("Set-Cookie"  => qq(JSESSIONID=fkumjm7nt1.JS24;Path=/trs));
 ##$res->push_header("Set-Cookie2" => qq(JSESSIONID=fkumjm7nt1.JS24;Version=1;Discard;Path="/trs"));
-###print $res->as_string;
+###;
 ##
 ##$c = HTTP::Cookies::Tiny::LWP->new;  # clear it
 ##$c->extract_cookies($res);
-##print $c->as_string;
+##;
 ##is($c->as_string, <<'EOT');
 ##Set-Cookie3: trip.appServer=1111-0000-x-024; path="/"; domain=.trip.com; path_spec; discard; version=0
 ##Set-Cookie3: JSESSIONID=fkumjm7nt1.JS24; path="/trs"; domain=www.trip.com; path_spec; discard; version=1
 ##EOT
-##
+
+# XXX not implemented yet -- xdg, 2013-02-11
 ###-------------------------------------------------------------------
 ### Test if temporary cookies are deleted properly with
 ### $jar->clear_temporary_cookies()
@@ -553,126 +548,88 @@ undef($c);
 ##is($counter{"perm_after"}, $counter{"perm_before"}); # a permanent cookie got lost accidently
 ##is($counter{"session_after"}, 0); # a session cookie hasn't been cleared
 ##is($counter{"session_before"}, 3);  # we didn't have session cookies in the first place
-###print $c->as_string;
-##
-##
-### Test handling of 'secure ' attribute for classic cookies
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$req = HTTP::Request->new(GET => "https://1.1.1.1/");
-##$req->header("Host", "www.acme.com:80");
-##
-##$res = HTTP::Response->new(200, "OK");
-##$res->request($req);
-##$res->header("Set-Cookie" => "CUSTOMER=WILE_E_COYOTE ; secure ; path=/");
-###print $res->as_string;
-##$c->extract_cookies($res);
-##
-##$req = HTTP::Request->new(GET => "http://www.acme.com/");
-##$c->add_cookie_header($req);
-##
-##ok(!$req->header("Cookie"));
-##
-##$req->uri->scheme("https");
-##$c->add_cookie_header($req);
-##
-##is($req->header("Cookie"), "CUSTOMER=WILE_E_COYOTE");
-##
-###print $req->as_string;
-###print $c->as_string;
-##
-##
-##$req = HTTP::Request->new(GET => "ftp://ftp.activestate.com/");
-##$c->add_cookie_header($req);
-##ok(!$req->header("Cookie"));
-##
-##$req = HTTP::Request->new(GET => "file:/etc/motd");
-##$c->add_cookie_header($req);
-##ok(!$req->header("Cookie"));
-##
-##$req = HTTP::Request->new(GET => "mailto:gisle\@aas.no");
-##$c->add_cookie_header($req);
-##ok(!$req->header("Cookie"));
-##
-##
-### Test cookie called 'exipres' <https://rt.cpan.org/Ticket/Display.html?id=8108>
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$req = HTTP::Request->new("GET" => "http://example.com");
-##$res = HTTP::Response->new(200, "OK");
-##$res->request($req);
-##$res->header("Set-Cookie" => "Expires=10101");
-##$c->extract_cookies($res);
-###print $c->as_string;
-##is($c->as_string, <<'EOT');
-##Set-Cookie3: Expires=10101; path="/"; domain=example.com; discard; version=0
-##EOT
-##
-### Test empty cookie header [RT#29401]
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$res->header("Set-Cookie" => ["CUSTOMER=WILE_E_COYOTE; path=/;", ""]);
-###print $res->as_string;
-##$c->extract_cookies($res);
-###print $c->as_string;
-##is($c->as_string, <<'EOT');
-##Set-Cookie3: CUSTOMER=WILE_E_COYOTE; path="/"; domain=example.com; path_spec; discard; version=0
-##EOT
-##
-### Test empty cookie part [RT#38480]
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$res->header("Set-Cookie" => "CUSTOMER=WILE_E_COYOTE;;path=/;");
-###print $res->as_string;
-##$c->extract_cookies($res);
-###print $c->as_string;
-##is($c->as_string, <<'EOT');
-##Set-Cookie3: CUSTOMER=WILE_E_COYOTE; path="/"; domain=example.com; path_spec; discard; version=0
-##EOT
-##
-### Test Set-Cookie with version set
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$res->header("Set-Cookie" => "foo=\"bar\";version=1");
-###print $res->as_string;
-##$c->extract_cookies($res);
-###print $c->as_string;
-##$req = HTTP::Request->new(GET => "http://www.example.com/foo");
-##$c->add_cookie_header($req);
-###print $req->as_string;
-##is($req->header("Cookie"), "foo=\"bar\"");
-##
-### Test cookies that expire far into the future [RT#50147]
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$res->header("Set-Cookie", "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL; expires=Mon, 03-Oct-2211 15:18:10 GMT; path=/; domain=.example.com");
-##$res->push_header("Set-Cookie", "expired1=1; expires=Mon, 03-Oct-2001 15:18:10 GMT; path=/; domain=.example.com");
-##$res->push_header("Set-Cookie", "expired2=1; expires=Fri Jan  1 00:00:00 GMT 1970; path=/; domain=.example.com");
-##$res->push_header("Set-Cookie", "expired3=1; expires=Fri Jan  1 00:00:01 GMT 1970; path=/; domain=.example.com");
-##$res->push_header("Set-Cookie", "expired4=1; expires=Thu Dec 31 23:59:59 GMT 1969; path=/; domain=.example.com");
-##$res->push_header("Set-Cookie", "expired5=1; expires=Fri Feb  2 00:00:00 GMT 1950; path=/; domain=.example.com");
-##$c->extract_cookies($res);
-###print $res->as_string;
-###print "---\n";
-###print $c->as_string;
-##$req = HTTP::Request->new(GET => "http://www.example.com/foo");
-##$c->add_cookie_header($req);
-###print $req->as_string;
-##is($req->header("Cookie"), "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL");
-##
-##$c->clear_temporary_cookies;
-##$req = HTTP::Request->new(GET => "http://www.example.com/foo");
-##$c->add_cookie_header($req);
-###print $req->as_string;
-##is($req->header("Cookie"), "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL");
-##
-### Test merging of cookies
-##$c = HTTP::Cookies::Tiny::LWP->new;
-##$res->header("Set-Cookie", "foo=1; path=/");
-##$c->extract_cookies($res);
-##
-##$req = HTTP::Request->new(GET => "http://www.example.com/foo");
-##$req->header("Cookie", "x=bcd");
-##$c->add_cookie_header($req);
-##is($req->header("Cookie"), "x=bcd; foo=1");
-##$c->add_cookie_header($req);
-##is($req->header("Cookie"), "x=bcd; foo=1; foo=1");
-###print $req->as_string;
-##
+###;
+
+
+# Test handling of 'secure ' attribute for classic cookies
+$c = HTTP::Cookies::Tiny::LWP->new;
+$req = HTTP::Request->new(GET => "https://1.1.1.1/");
+$req->header("Host", "www.acme.com:80");
+
+$res = HTTP::Response->new(200, "OK");
+$res->request($req);
+$res->header("Set-Cookie" => "CUSTOMER=WILE_E_COYOTE ; secure ; path=/");
+#;
+$c->extract_cookies($res);
+
+$req = HTTP::Request->new(GET => "http://www.acme.com/");
+$c->add_cookie_header($req);
+
+ok(!$req->header("Cookie"));
+
+$req->uri->scheme("https");
+$c->add_cookie_header($req);
+
+is($req->header("Cookie"), "CUSTOMER=WILE_E_COYOTE");
+
+
+$req = HTTP::Request->new(GET => "ftp://ftp.activestate.com/");
+$c->add_cookie_header($req);
+ok(!$req->header("Cookie"));
+
+$req = HTTP::Request->new(GET => "file:/etc/motd");
+$c->add_cookie_header($req);
+ok(!$req->header("Cookie"));
+
+$req = HTTP::Request->new(GET => "mailto:gisle\@aas.no");
+$c->add_cookie_header($req);
+ok(!$req->header("Cookie"));
+
+
+# Test cookie called 'expires' <https://rt.cpan.org/Ticket/Display.html?id=8108>
+$c = HTTP::Cookies::Tiny::LWP->new;
+$cookie=interact($c, "http://example.com/", 'Expires=10101');
+$cookie=interact($c, "http://example.com/");
+is($cookie, 'Expires=10101') or diag explain $c;
+
+# Test empty cookie header [RT#29401]
+$c = HTTP::Cookies::Tiny::LWP->new;
+$cookie=interact($c, "http://example.com/", "CUSTOMER=WILE_E_COYOTE; path=/;", "");
+is(count_cookies($c), 1, "empty cookie not set");
+
+# Test empty cookie part [RT#38480]
+$c = HTTP::Cookies::Tiny::LWP->new;
+$cookie=interact($c, "http://example.com/", "CUSTOMER=WILE_E_COYOTE;;path=/;");
+$cookie=interact($c, "http://example.com/");
+like($cookie, qr/CUSTOMER=WILE_E_COYOTE/, "empty attribute ignored");
+
+# Test Set-Cookie with version set
+$c = HTTP::Cookies::Tiny::LWP->new;
+$cookie=interact($c, "http://example.com/", "foo=\"bar\";version=1");
+$cookie=interact($c, "http://example.com/");
+is($cookie, "foo=\"bar\"", "version ignored");
+
+# Test cookies that expire far into the future [RT#50147] ( or past ? )
+$c = HTTP::Cookies::Tiny::LWP->new;
+interact($c, "http://example.com/foo",
+    "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL; expires=Mon, 03-Oct-2211 15:18:10 GMT; path=/; domain=.example.com",
+    "expired1=1; expires=Mon, 03-Oct-2001 15:18:10 GMT; path=/; domain=.example.com",
+    "expired2=1; expires=Fri Jan  1 00:00:00 GMT 1970; path=/; domain=.example.com",
+    "expired3=1; expires=Fri Jan  1 00:00:01 GMT 1970; path=/; domain=.example.com",
+    "expired4=1; expires=Thu Dec 31 23:59:59 GMT 1969; path=/; domain=.example.com",
+    "expired5=1; expires=Fri Feb  2 00:00:00 GMT 1950; path=/; domain=.example.com",
+);
+$cookie=interact($c, "http://example.com/foo");
+
+is( $cookie, "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL", "far future and past")
+    or diag explain $c;
+
+# Test merging of cookies
+$c = HTTP::Cookies::Tiny::LWP->new;
+interact($c, "http://example.com/foo/bar", "foo=1");
+interact($c, "http://example.com/foo", "foo=2; path=/");
+$cookie = interact($c, "http://example.com/foo/bar");
+is( $cookie, "foo=1; foo=2", "merging cookies" );
 
 #-------------------------------------------------------------------
 
