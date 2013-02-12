@@ -176,10 +176,7 @@ sub _parse_http_date {
     {
         @tl_parts = ( $5, $4, $3, $2, ( index( $MoY, $1 ) / 4 ), $6 );
     }
-    return eval {
-        my $t = @tl_parts ? Time::Local::timegm(@tl_parts) : -1;
-        $t < 0 ? undef : $t;
-    };
+    return eval { Time::Local::timegm(@tl_parts) };
 }
 
 sub _split_url {
