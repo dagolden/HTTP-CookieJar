@@ -74,26 +74,25 @@ sub _normalize_path          # so that plain string compare can be used
 1;
 
 =for Pod::Coverage method_names_here
+add_cookie_header
+extract_cookies
 
 =head1 SYNOPSIS
 
+  use LWP::UserAgent;
   use HTTP::CookieJar::LWP;
+
+  my $ua = LWP::UserAgent->new(
+    cookie_jar => HTTP::CookieJar::LWP->new
+  );
 
 =head1 DESCRIPTION
 
-More or less compatible with HTTP::Cookies for use with LWP.
+This module is an experimental adapter to make L<HTTP::CookieJar> work with
+L<LWP>.  It implements the two methods that C<LWP> calls from L<HTTP::Cookies>.
 
-Doesn't implement all methods of HTTP::Cookies -- only ones LWP calls.
-
-Doesn't do Cookie2 stuff.
-
-=head1 USAGE
-
-Good luck!
-
-=head1 SEE ALSO
-
-Maybe other modules do related things.
+It is not a general-purpose drop-in replacement for C<HTTP::Cookies> in any
+other way.
 
 =cut
 

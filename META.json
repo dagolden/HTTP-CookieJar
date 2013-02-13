@@ -40,9 +40,9 @@
       },
       "runtime" : {
          "requires" : {
-            "Path::Tiny" : "0",
-            "Time::Local" : "0",
-            "inherit" : "0",
+            "Carp" : "0",
+            "HTTP::Date" : "0",
+            "parent" : "0",
             "perl" : "v5.10.0",
             "strict" : "0",
             "warnings" : "0"
