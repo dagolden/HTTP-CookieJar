@@ -6,8 +6,6 @@ package HTTP::CookieJar;
 # ABSTRACT: A minimalist HTTP user agent cookie jar
 # VERSION
 
-use Path::Tiny ();
-
 sub new {
     my ($class) = @_;
     bless { store => {} }, $class;
@@ -28,7 +26,6 @@ sub add {
     # XXX doesn't check for public suffixes; see Mozilla::PublicSuffix
     if ( exists $parse->{domain} ) {
         return unless _domain_match( $host, $parse->{domain} );
-        $parse->{hostonly} = 0;
     }
     else {
         $parse->{domain}   = $host;
@@ -43,7 +40,7 @@ sub add {
     # set timestamps and normalize expires
     my $now = $parse->{creation_time} = $parse->{last_access_time} = time;
     if ( exists $parse->{'max-age'} ) {
-        $parse->{expires} = $now + $parse->{'max-age'};
+        $parse->{expires} = $now + delete $parse->{'max-age'};
     }
     # update creation time from old cookie, if exists
     if ( my $old = $self->{store}{$domain}{$path}{$name} ) {
@@ -90,13 +87,17 @@ sub _all_cookies {
 }
 
 # generate as list that can be fed back in to add
-sub as_list {
+sub dump_cookies {
     my ( $self, $args ) = @_;
     my @list;
     for my $c ( $self->_all_cookies ) {
-        next if $args->{persistent} && !defined $c->{expires};
         my @parts = "$c->{name}=$c->{value}";
-        for my $attr (qw/Domain Path Expires Creation_Time Last_Access_Time/) {
+        if ( defined $c->{expires} ) { 
+            push @parts, 'Expires=' . _http_date($c->{expires});
+        } else {
+            next if $args->{persistent};
+        }
+        for my $attr (qw/Domain Path Creation_Time Last_Access_Time/) {
             push @parts, "$attr=$c->{lc $attr}" if defined $c->{ lc $attr };
         }
         for my $attr (qw/Secure HttpOnly HostOnly/) {
@@ -107,24 +108,15 @@ sub as_list {
     return @list;
 }
 
-sub from_list {
+# returns self
+sub load_cookies {
     my ( $self, @cookies ) = @_;
     for my $cookie ( @cookies ) {
         my $p = _parse_cookie($cookie, 1);
+        next unless exists $p->{domain} && exists $p->{path};
         $p->{$_} //= time for qw/creation_time last_access_time/;
         $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
     }
-    return;
-}
-
-sub save {
-    my ( $self, $filename ) = @_;
-    Path::Tiny::path($filename)->spew( join( "\n", $self->as_list ) );
-}
-
-sub load {
-    my ( $self, $filename ) = @_;
-    $self->from_list( Path::Tiny::path($filename)->lines( { chomp => 1 } ) );
     return $self;
 }
 
