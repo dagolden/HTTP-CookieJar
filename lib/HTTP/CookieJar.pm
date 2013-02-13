@@ -6,6 +6,8 @@ package HTTP::CookieJar;
 # ABSTRACT: A minimalist HTTP user agent cookie jar
 # VERSION
 
+use HTTP::Date ();
+
 sub new {
     my ($class) = @_;
     bless { store => {} }, $class;
@@ -93,7 +95,7 @@ sub dump_cookies {
     for my $c ( $self->_all_cookies ) {
         my @parts = "$c->{name}=$c->{value}";
         if ( defined $c->{expires} ) { 
-            push @parts, 'Expires=' . _http_date($c->{expires});
+            push @parts, 'Expires=' . HTTP::Date::time2str($c->{expires});
         } else {
             next if $args->{persistent};
         }
@@ -139,7 +141,7 @@ sub _parse_cookie {
         $k = lc $k;
         next unless $private ? ( $k =~ m/^$pvt_re$/ ) : ( $k =~ m/^$pub_re$/ );
         $v = 1 if $k =~ m/^(?:httponly|secure|hostonly)$/; # boolean flag if present
-        $v = _parse_http_date($v) if $k eq 'expires'; # convert to epoch
+        $v = HTTP::Date::str2time($v) // 0 if $k eq 'expires'; # convert to epoch
         next unless length $v;
         $v =~ s{^\.}{}                            if $k eq 'domain'; # strip leading dot
         $v =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if $k eq 'path';   # unescape
@@ -174,45 +176,6 @@ sub _path_match {
         return 1 if substr( $rest,        0,  1 ) eq '/';
     }
     return;
-}
-
-# Date conversions adapted from HTTP::Date
-my $DoW = "Sun|Mon|Tue|Wed|Thu|Fri|Sat";
-my $MoY = "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec";
-
-sub _http_date {
-    my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime(shift);
-    return sprintf(
-        "%s, %02d %s %04d %02d:%02d:%02d GMT",
-        substr( $DoW, $wday * 4, 3 ),
-        $mday,
-        substr( $MoY, $mon * 4, 3 ),
-        $year + 1900,
-        $hour, $min, $sec
-    );
-}
-
-sub _parse_http_date {
-    my ($str) = @_;
-    require Time::Local;
-    my @tl_parts;
-    if (
-        $str =~ /^[SMTWF][a-z]+, +(\d{1,2}) ($MoY) +(\d\d\d\d) +(\d\d):(\d\d):(\d\d) +GMT$/ )
-    {
-        @tl_parts = ( $6, $5, $4, $1, ( index( $MoY, $2 ) / 4 ), $3 );
-    }
-    elsif (
-        $str =~ /^[SMTWF][a-z]+, +(\d\d)-($MoY)-(\d{2,4}) +(\d\d):(\d\d):(\d\d) +GMT$/ )
-    {
-        @tl_parts = ( $6, $5, $4, $1, ( index( $MoY, $2 ) / 4 ), $3 );
-    }
-    elsif ( $str
-        =~ /^[SMTWF][a-z]+ +($MoY) +(\d{1,2}) +(\d\d):(\d\d):(\d\d) +(?:[^0-9]+ +)?(\d\d\d\d)$/
-      )
-    {
-        @tl_parts = ( $5, $4, $3, $2, ( index( $MoY, $1 ) / 4 ), $6 );
-    }
-    return eval { Time::Local::timegm(@tl_parts) };
 }
 
 sub _split_url {
