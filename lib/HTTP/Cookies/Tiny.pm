@@ -25,11 +25,7 @@ sub save {
 
 sub load {
     my ( $self, $filename ) = @_;
-    for my $cookie ( Path::Tiny::path($filename)->lines( { chomp => 1 } ) ) {
-        my $p = _parse_cookie($cookie, 1);
-        $p->{$_} //= time for qw/creation_time last_access_time/;
-        $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
-    }
+    $self->from_list( Path::Tiny::path($filename)->lines( { chomp => 1 } ) );
     return $self;
 }
 
@@ -120,6 +116,16 @@ sub as_list {
         push @list, join( "; ", @parts );
     }
     return @list;
+}
+
+sub from_list {
+    my ( $self, @cookies ) = @_;
+    for my $cookie ( @cookies ) {
+        my $p = _parse_cookie($cookie, 1);
+        $p->{$_} //= time for qw/creation_time last_access_time/;
+        $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
+    }
+    return;
 }
 
 #--------------------------------------------------------------------------#
