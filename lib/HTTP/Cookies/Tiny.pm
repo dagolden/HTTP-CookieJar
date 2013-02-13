@@ -18,17 +18,6 @@ sub clear {
     $self->{store} = {};
 }
 
-sub save {
-    my ( $self, $filename ) = @_;
-    Path::Tiny::path($filename)->spew( join( "\n", $self->as_list ) );
-}
-
-sub load {
-    my ( $self, $filename ) = @_;
-    $self->from_list( Path::Tiny::path($filename)->lines( { chomp => 1 } ) );
-    return $self;
-}
-
 sub add {
     my ( $self, $request, $cookie ) = @_;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
@@ -126,6 +115,17 @@ sub from_list {
         $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
     }
     return;
+}
+
+sub save {
+    my ( $self, $filename ) = @_;
+    Path::Tiny::path($filename)->spew( join( "\n", $self->as_list ) );
+}
+
+sub load {
+    my ( $self, $filename ) = @_;
+    $self->from_list( Path::Tiny::path($filename)->lines( { chomp => 1 } ) );
+    return $self;
 }
 
 #--------------------------------------------------------------------------#
