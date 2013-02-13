@@ -650,7 +650,7 @@ sub interact
 sub count_cookies
 {
     my $c = shift;
-    return scalar $c->all_cookies;
+    return scalar $c->_all_cookies;
 }
 
 done_testing;
