@@ -4,7 +4,7 @@ use warnings;
 use Test::More 0.96;
 use Test::Deep '!blessed';
 
-use HTTP::Cookies::Tiny;
+use HTTP::CookieJar;
 
 my @cases = (
     {
@@ -175,7 +175,7 @@ my @cases = (
 );
 
 for my $c (@cases) {
-    my $jar = HTTP::Cookies::Tiny->new;
+    my $jar = HTTP::CookieJar->new;
     for my $cookie ( @{ $c->{cookies} } ) {
         $jar->add( $c->{request}, $cookie );
     }

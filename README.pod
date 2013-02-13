@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-HTTP::Cookies::Tiny - A tiny HTTP cookie jar
+HTTP::CookieJar - A tiny HTTP cookie jar
 
 =head1 VERSION
 
@@ -10,7 +10,7 @@ version 0.001
 
 =head1 SYNOPSIS
 
-  use HTTP::Cookies::Tiny;
+  use HTTP::CookieJar;
 
 =head1 DESCRIPTION
 
@@ -34,7 +34,7 @@ Maybe other modules do related things.
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://github.com/dagolden/http-cookies-tiny/issues>.
+at L<https://github.com/dagolden/http-cookiejar/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -42,9 +42,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/http-cookies-tiny>
+L<https://github.com/dagolden/http-cookiejar>
 
-  git clone git://github.com/dagolden/http-cookies-tiny.git
+  git clone git://github.com/dagolden/http-cookiejar.git
 
 =head1 AUTHOR
 

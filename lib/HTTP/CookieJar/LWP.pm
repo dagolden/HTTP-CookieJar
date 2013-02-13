@@ -2,11 +2,11 @@ use 5.008001;
 use strict;
 use warnings;
 
-package HTTP::Cookies::Tiny::LWP;
+package HTTP::CookieJar::LWP;
 # ABSTRACT: Emulate HTTP::Cookies for LWP
 # VERSION
 
-use inherit 'HTTP::Cookies::Tiny';
+use inherit 'HTTP::CookieJar';
 
 sub add_cookie_header {
     my ( $self, $request ) = @_;
@@ -74,7 +74,7 @@ sub _normalize_path          # so that plain string compare can be used
 
 =head1 SYNOPSIS
 
-  use HTTP::Cookies::Tiny::LWP;
+  use HTTP::CookieJar::LWP;
 
 =head1 DESCRIPTION
 

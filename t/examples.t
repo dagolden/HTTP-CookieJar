@@ -3,12 +3,12 @@ use strict;
 use warnings;
 use Test::More 0.96;
 
-use HTTP::Cookies::Tiny;
+use HTTP::CookieJar;
 
 my $req  = "http://www.example.com/foo/bar";
 my $sreq = "https://www.example.com/foo/bar";
 
-my $jar = new_ok("HTTP::Cookies::Tiny");
+my $jar = new_ok("HTTP::CookieJar");
 
 subtest "just key & value" => sub {
     $jar->clear;

@@ -2,7 +2,7 @@ use v5.10;
 use strict;
 use warnings;
 
-package HTTP::Cookies::Tiny;
+package HTTP::CookieJar;
 # ABSTRACT: A tiny HTTP cookie jar
 # VERSION
 
@@ -252,7 +252,7 @@ sub _split_url {
 
 =head1 SYNOPSIS
 
-  use HTTP::Cookies::Tiny;
+  use HTTP::CookieJar;
 
 =head1 DESCRIPTION
 

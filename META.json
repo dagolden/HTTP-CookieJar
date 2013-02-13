@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "HTTP-Cookies-Tiny",
+   "name" : "HTTP-CookieJar",
    "no_index" : {
       "directory" : [
          "t",
@@ -40,7 +40,9 @@
       },
       "runtime" : {
          "requires" : {
+            "Path::Tiny" : "0",
             "Time::Local" : "0",
+            "inherit" : "0",
             "perl" : "v5.10.0",
             "strict" : "0",
             "warnings" : "0"
@@ -48,29 +50,42 @@
       },
       "test" : {
          "requires" : {
+            "ExtUtils::MakeMaker" : "0",
             "File::Find" : "0",
+            "File::Spec::Functions" : "0",
             "File::Temp" : "0",
+            "HTTP::CookieJar" : "0",
+            "HTTP::CookieJar::LWP" : "0",
+            "HTTP::Request" : "0",
+            "HTTP::Response" : "0",
+            "List::Util" : "0",
             "Test::Deep" : "0",
-            "Test::More" : "0.96"
+            "Test::More" : "0.96",
+            "Time::Mock" : "0",
+            "URI" : "0"
          }
       }
    },
    "provides" : {
-      "HTTP::Cookies::Tiny" : {
+      "HTTP::CookieJar" : {
          "file" : "lib/HTTP/Cookies/Tiny.pm",
+         "version" : "0.001"
+      },
+      "HTTP::CookieJar::LWP" : {
+         "file" : "lib/HTTP/Cookies/Tiny/LWP.pm",
          "version" : "0.001"
       }
    },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/dagolden/http-cookies-tiny/issues"
+         "web" : "https://github.com/dagolden/http-cookiejar/issues"
       },
-      "homepage" : "https://metacpan.org/release/HTTP-Cookies-Tiny",
+      "homepage" : "https://metacpan.org/release/HTTP-CookieJar",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/dagolden/http-cookies-tiny.git",
-         "web" : "https://github.com/dagolden/http-cookies-tiny"
+         "url" : "git://github.com/dagolden/http-cookiejar.git",
+         "web" : "https://github.com/dagolden/http-cookiejar"
       }
    },
    "version" : "0.001"

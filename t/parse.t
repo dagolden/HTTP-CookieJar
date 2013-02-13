@@ -4,7 +4,7 @@ use warnings;
 use Test::More 0.96;
 use Test::Deep '!blessed';
 
-use HTTP::Cookies::Tiny;
+use HTTP::CookieJar;
 
 my @cases = (
     {
@@ -102,7 +102,7 @@ my @cases = (
 );
 
 for my $c (@cases) {
-    my $got = HTTP::Cookies::Tiny::_parse_cookie( $c->{cookie} );
+    my $got = HTTP::CookieJar::_parse_cookie( $c->{cookie} );
     cmp_deeply $got, $c->{parse}, $c->{cookie} || q{''};
 }
 

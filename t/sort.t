@@ -5,7 +5,7 @@ use Test::More 0.96;
 use Test::Deep '!blessed';
 use Time::Mock;
 
-use HTTP::Cookies::Tiny;
+use HTTP::CookieJar;
 
 my @cases = (
     {
@@ -29,7 +29,7 @@ my @cases = (
 );
 
 for my $c (@cases) {
-    my $jar = HTTP::Cookies::Tiny->new;
+    my $jar = HTTP::CookieJar->new;
     my $offset = 0;
     for my $cookie ( @{ $c->{cookies} } ) {
         Time::Mock->offset($offset);

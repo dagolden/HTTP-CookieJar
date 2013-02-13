@@ -2,7 +2,7 @@ use 5.008001;
 use warnings;
 use Test::More 0.96;
 
-use HTTP::Cookies::Tiny::LWP;
+use HTTP::CookieJar::LWP;
 use HTTP::Request;
 use HTTP::Response;
 
@@ -44,7 +44,7 @@ use HTTP::Response;
 
 my $year_plus_one = (localtime)[5] + 1900 + 1;
 
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 
 $req = HTTP::Request->new(GET => "http://1.1.1.1/");
 $req->header("Host", "www.acme.com:80");
@@ -115,7 +115,7 @@ ok($h =~ /^SHIPPING=FEDEX;/);
 #       NOTE: There are two name/value pairs named "PART_NUMBER" due to
 #       the inheritance of the "/" mapping in addition to the "/ammo" mapping.
 
-$c = HTTP::Cookies::Tiny::LWP->new;  # clear it
+$c = HTTP::CookieJar::LWP->new;  # clear it
 
 $req = HTTP::Request->new(GET => "http://www.acme.com/");
 $res = HTTP::Response->new(200, "OK");
@@ -145,7 +145,7 @@ undef($c);
 # When there are no "Set-Cookie" header, then even responses
 # without any request URLs connected should be allowed.
 
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $c->extract_cookies(HTTP::Response->new("200", "OK"));
 is(count_cookies($c), 0);
 
@@ -157,7 +157,7 @@ is(count_cookies($c), 0);
 
 # XXX BUT CONVERT THEM FROM COOKIE2 TO REGULAR COOKIE --xdg
 
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 
 #
 # 5.1  Example 1
@@ -266,7 +266,7 @@ like($cookie, qr/WILE_E_COYOTE/);
 # of request and response headers has been omitted.  Assume the user agent
 # has no stored cookies.
 
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 
 # Imagine the user agent has received, in response to earlier requests,
 # the response headers
@@ -317,7 +317,7 @@ ok($cookie !~ /Riding_Rocket_0023/);
 
 # Test rejection of Set-Cookie2 responses based on domain, path or port
 
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 
 # XXX RFC 6265 says strip leading dots and embedded dots in prefix are OK
 ### illegal domain (no embedded dots)
@@ -372,7 +372,7 @@ is(count_cookies($c), 6);
 ##$old = $c->as_string;
 ##undef($c);
 
-##$c = HTTP::Cookies::Tiny::LWP->new;
+##$c = HTTP::CookieJar::LWP->new;
 ##$c->load($file);
 ##unlink($file) || warn "Can't unlink $file: $!";
 ##
@@ -383,7 +383,7 @@ is(count_cookies($c), 6);
 #
 # Try some URL encodings of the PATHs
 #
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 interact($c, "http://www.acme.com/foo%2f%25/%40%40%0Anew%E5/%E5", 'foo  =   bar');
 ##;
 $cookie = interact($c, "http://www.acme.com/foo%2f%25/@@%0anewå/æøå", "bar=baz; path=/foo/");
@@ -396,14 +396,14 @@ undef($c);
 ### Try to use the Netscape cookie file format for saving
 ###
 ##$file = "cookies-$$.txt";
-##$c = HTTP::Cookies::Tiny::LWP->new(file => $file);
+##$c = HTTP::CookieJar::LWP->new(file => $file);
 ##interact($c, "http://www.acme.com/", "foo1=bar; max-age=100");
 ##interact($c, "http://www.acme.com/", "foo2=bar; port=\"80\"; max-age=100; Discard; Version=1");
 ##interact($c, "http://www.acme.com/", "foo3=bar; secure; Version=1");
 ##$c->save;
 ##undef($c);
 ##
-##$c = HTTP::Cookies::Tiny::LWP->new(file => $file);
+##$c = HTTP::CookieJar::LWP->new(file => $file);
 ##is(count_cookies($c), 1);     # 2 of them discarded on save
 ##
 ##ok($c->as_string =~ /foo1=bar/);
@@ -414,7 +414,7 @@ undef($c);
 #
 # Some additional Netscape cookies test
 #
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $req = HTTP::Request->new(POST => "http://foo.bar.acme.com/foo");
 
 # Netscape allows a host part that contains dots
@@ -465,7 +465,7 @@ ok($req->header("Cookie") =~ /Customer=WILE_E_COYOTE/);
 # e.g. with Path set to nothing.
 # In this case routine extract_cookies() must set cookie to / (root)
 
-$c = HTTP::Cookies::Tiny::LWP->new;  # clear it
+$c = HTTP::CookieJar::LWP->new;  # clear it
 
 $req = HTTP::Request->new(GET => "http://www.ants.com/");
 
@@ -513,7 +513,7 @@ is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
 ##$res->push_header("Set-Cookie2" => qq(JSESSIONID=fkumjm7nt1.JS24;Version=1;Discard;Path="/trs"));
 ###;
 ##
-##$c = HTTP::Cookies::Tiny::LWP->new;  # clear it
+##$c = HTTP::CookieJar::LWP->new;  # clear it
 ##$c->extract_cookies($res);
 ##;
 ##is($c->as_string, <<'EOT');
@@ -537,7 +537,7 @@ is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
 ##$res->push_header("Set-Cookie"  => qq(s2=session;Path=/scripts;Domain=.perlmeister.com));
 ##$res->push_header("Set-Cookie2" => qq(s3=session;Version=1;Discard;Path="/"));
 ##
-##$c = HTTP::Cookies::Tiny::LWP->new;  # clear jar
+##$c = HTTP::CookieJar::LWP->new;  # clear jar
 ##$c->extract_cookies($res);
 ### How many session/permanent cookies do we have?
 ##my %counter = ("session_after" => 0);
@@ -552,7 +552,7 @@ is($req->header("Cookie"), "JSESSIONID=ABCDERANDOM123");
 
 
 # Test handling of 'secure ' attribute for classic cookies
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $req = HTTP::Request->new(GET => "https://1.1.1.1/");
 $req->header("Host", "www.acme.com:80");
 
@@ -587,30 +587,30 @@ ok(!$req->header("Cookie"));
 
 
 # Test cookie called 'expires' <https://rt.cpan.org/Ticket/Display.html?id=8108>
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $cookie=interact($c, "http://example.com/", 'Expires=10101');
 $cookie=interact($c, "http://example.com/");
 is($cookie, 'Expires=10101') or diag explain $c;
 
 # Test empty cookie header [RT#29401]
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $cookie=interact($c, "http://example.com/", "CUSTOMER=WILE_E_COYOTE; path=/;", "");
 is(count_cookies($c), 1, "empty cookie not set");
 
 # Test empty cookie part [RT#38480]
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $cookie=interact($c, "http://example.com/", "CUSTOMER=WILE_E_COYOTE;;path=/;");
 $cookie=interact($c, "http://example.com/");
 like($cookie, qr/CUSTOMER=WILE_E_COYOTE/, "empty attribute ignored");
 
 # Test Set-Cookie with version set
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 $cookie=interact($c, "http://example.com/", "foo=\"bar\";version=1");
 $cookie=interact($c, "http://example.com/");
 is($cookie, "foo=\"bar\"", "version ignored");
 
 # Test cookies that expire far into the future [RT#50147] ( or past ? )
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 interact($c, "http://example.com/foo",
     "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL; expires=Mon, 03-Oct-2211 15:18:10 GMT; path=/; domain=.example.com",
     "expired1=1; expires=Mon, 03-Oct-2001 15:18:10 GMT; path=/; domain=.example.com",
@@ -625,7 +625,7 @@ is( $cookie, "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9Pxr
     or diag explain $c;
 
 # Test merging of cookies
-$c = HTTP::Cookies::Tiny::LWP->new;
+$c = HTTP::CookieJar::LWP->new;
 interact($c, "http://example.com/foo/bar", "foo=1");
 interact($c, "http://example.com/foo", "foo=2; path=/");
 $cookie = interact($c, "http://example.com/foo/bar");
