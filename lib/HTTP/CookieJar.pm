@@ -6,7 +6,7 @@ package HTTP::CookieJar;
 # ABSTRACT: A minimalist HTTP user agent cookie jar
 # VERSION
 
-use Carp ();
+use Carp       ();
 use HTTP::Date ();
 
 my $HAS_MPS = eval { require Mozilla::PublicSuffix; 1 };
@@ -42,7 +42,7 @@ successful cookie processing or undef/empty-list on failure.
 
 sub add {
     my ( $self, $request, $cookie ) = @_;
-    my ( $scheme, $host, $port, $request_path ) = eval {_split_url($request)};
+    my ( $scheme, $host, $port, $request_path ) = eval { _split_url($request) };
     Carp::croak($@) if $@;
 
     return unless my $parse = _parse_cookie($cookie);
@@ -266,13 +266,15 @@ my $pvt_re = qr/(?:$pub_re|creation_time|last_access_time|hostonly)/;
 
 sub _parse_cookie {
     my ( $cookie, $private ) = @_;
-    my ( $kvp,    @attrs )   = split /;/, $cookie // '';
-    my ( $name,   $value )   = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '', 2; ## no critic
+    my ( $kvp, @attrs ) = split /;/, $cookie // '';
+    my ( $name, $value ) =
+      map { s/^\s*//; s/\s*$//; $_ } split( /=/, $kvp // '', 2 ); ## no critic
+
     return unless length $name;
     my $parse = { name => $name, value => $value // "" };
     for my $s (@attrs) {
         next unless defined $s && $s =~ /\S/;
-        my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $s, 2; ## no critic
+        my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split( /=/, $s, 2 ); ## no critic
         $k = lc $k;
         next unless $private ? ( $k =~ m/^$pvt_re$/ ) : ( $k =~ m/^$pub_re$/ );
         $v = 1 if $k =~ m/^(?:httponly|secure|hostonly)$/; # boolean flag if present
@@ -298,7 +300,7 @@ sub _domain_match {
 sub _normalize_domain {
     my ( $host, $parse ) = @_;
 
-    if ( $HAS_MPS )  {
+    if ($HAS_MPS) {
         my $host_pub_suff = eval { Mozilla::PublicSuffix::public_suffix($host) } // '';
         if ( _domain_match( $host_pub_suff, $parse->{domain} ) ) {
             if ( $parse->{domain} eq $host ) {
@@ -320,7 +322,7 @@ sub _normalize_domain {
 sub _default_path {
     my ($path) = @_;
     return "/" if !length $path || substr( $path, 0, 1 ) ne "/";
-    my ($default) = $path =~ m{^(.*)/};                              # greedy to last /
+    my ($default) = $path =~ m{^(.*)/}; # greedy to last /
     return length($default) ? $default : "/";
 }
 
