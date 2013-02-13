@@ -101,7 +101,7 @@ Given a request URL, returns a list of hash references representing cookies
 that should be sent.  The hash references are copies -- changing values
 will not change the cookies in the jar.
 
-Cookies set 'secure' will only be returned if the request scheme is 'https'.
+Cookies set C<secure> will only be returned if the request scheme is C<https>.
 Expired cookies will not be returned.
 
 Keys of a cookie hash reference might include:
@@ -112,13 +112,13 @@ Keys of a cookie hash reference might include:
 * domain -- the domain name to which the cookie applies
 * path -- the path to which the cookie applies
 * expires -- if present, when the cookie expires in epoch seconds
-* secure -- if present, the cookie was set 'Secure'
-* httponly -- if present, the cookie was set 'HttpOnly'
+* secure -- if present, the cookie was set C<Secure>
+* httponly -- if present, the cookie was set C<HttpOnly>
 * hostonly -- if present, the cookie may only be used with the domain as a host
 * creation_time -- epoch seconds since the cookie was first stored
 * last_access_time -- epoch seconds since the cookie was last stored
 
-Keep in mind that 'httponly' means it should only be used in requests and not
+Keep in mind that C<httponly> means it should only be used in requests and not
 made available via Javascript, etc.  This is pretty meaningless for Perl user
 agents.
 
@@ -217,7 +217,7 @@ sub dump_cookies {
     $jar->load_cookies( @cookies );
 
 Given a list of cookie strings from C<dump_cookies>, it adds them to
-the cookie jar.  Cookies added in this way will supercede any existing
+the cookie jar.  Cookies added in this way will supersede any existing
 cookies with similar domain, path and name.
 
 It returns the jar object for convenience when loading a new object:
@@ -345,7 +345,7 @@ sub _split_url {
   my $jar = HTTP::CookieJar->new;
 
   # add cookie received from a request
-  $jar->add( "http://www.example.com/", "CUSTOMER=WILE_E_COYOTE" );
+  $jar->add( "http://www.example.com/", "CUSTOMER=WILE_E_COYOTE; Path=/; Domain=example.com" );
 
   # extract cookie header for a given request
   my $cookie = $jar->cookie_header( "http://www.example.com/" );
@@ -357,7 +357,7 @@ conformance with L<RFC 6265|http://tools.ietf.org/html/rfc6265>.
 
 Unlike the commonly used L<HTTP::Cookies> module, this module does
 not require use of L<HTTP::Request> and L<HTTP::Response> objects.
-An LWP-compatible adapter is availabe as L<HTTP::CookieJar::LWP>.
+An LWP-compatible adapter is available as L<HTTP::CookieJar::LWP>.
 
 =head1 LIMITATIONS AND CAVEATS
 
@@ -368,7 +368,7 @@ of RFC 6265.  Therefore, it does not handle nor generate C<Set-Cookie2>
 and C<Cookie2> headers, implement C<.local> suffixes, or do path/domain
 matching in accord with prior RFC's.
 
-=head2 Internationalzed domain names
+=head2 Internationalized domain names
 
 Internationalized domain names given in requests must be properly
 encoded in ASCII form.
@@ -387,7 +387,9 @@ cookie for unrelated Site B, which is one potential third-party cookie vector.
 
 =head1 SEE ALSO
 
-Maybe other modules do related things.
+=for :list
+* L<HTTP::Cookies>
+* L<Mojo::UserAgent::CookieJar>
 
 =cut
 
