@@ -64,7 +64,6 @@ my @cases = (
                         creation_time    => ignore(),
                         last_access_time => ignore(),
                         domain           => "example.com",
-                        hostonly         => 0,
                         path             => "/",
                     }
                 }
