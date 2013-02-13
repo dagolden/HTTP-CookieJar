@@ -3,15 +3,15 @@ use strict;
 use warnings;
 
 package HTTP::CookieJar::LWP;
-# ABSTRACT: Emulate HTTP::Cookies for LWP
+# ABSTRACT: LWP adapter for HTTP::CookieJar
 # VERSION
 
-use inherit 'HTTP::CookieJar';
+use parent 'HTTP::CookieJar';
 
 sub add_cookie_header {
     my ( $self, $request ) = @_;
 
-    my $url = _get_url($request, $request->uri);
+    my $url = _get_url( $request, $request->uri );
     return unless ( $url->scheme =~ /^https?\z/ );
 
     my $header = $self->cookie_header($url);
@@ -24,16 +24,20 @@ sub extract_cookies {
     my ( $self, $response ) = @_;
 
     my $request = $response->request
-        or return;
+      or return;
 
-    my $url = _get_url($request, $request->uri);
+    my $url = _get_url( $request, $request->uri );
 
     $self->add( $url, $_ ) for $response->_header("Set-Cookie");
 
     return $response;
 }
 
-sub as_string { '' }
+sub as_string { join( "\n", $_[0]->dump_cookies ) }
+
+#--------------------------------------------------------------------------#
+# helper subroutines
+#--------------------------------------------------------------------------#
 
 sub _get_url {
     my ( $request, $url ) = @_;
@@ -68,6 +72,7 @@ sub _normalize_path          # so that plain string compare can be used
               /eg;
     $_[0] =~ s/([\0-\x20\x7f-\xff])/sprintf("%%%02X",ord($1))/eg;
 }
+
 1;
 
 =for Pod::Coverage method_names_here

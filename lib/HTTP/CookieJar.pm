@@ -13,11 +13,6 @@ sub new {
     bless { store => {} }, $class;
 }
 
-sub clear {
-    my ($self) = @_;
-    $self->{store} = {};
-}
-
 sub add {
     my ( $self, $request, $cookie ) = @_;
     my ( $scheme, $host, $port, $request_path ) = _split_url($request);
@@ -57,6 +52,11 @@ sub add {
     }
 }
 
+sub clear {
+    my ($self) = @_;
+    $self->{store} = {};
+}
+
 sub cookies_for {
     my ( $self, $request ) = @_;
     return unless length $request;
@@ -84,19 +84,16 @@ sub cookie_header {
     return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($req) );
 }
 
-sub _all_cookies {
-    return map { { %$_ } } map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
-}
-
 # generate as list that can be fed back in to add
 sub dump_cookies {
     my ( $self, $args ) = @_;
     my @list;
     for my $c ( $self->_all_cookies ) {
         my @parts = "$c->{name}=$c->{value}";
-        if ( defined $c->{expires} ) { 
-            push @parts, 'Expires=' . HTTP::Date::time2str($c->{expires});
-        } else {
+        if ( defined $c->{expires} ) {
+            push @parts, 'Expires=' . HTTP::Date::time2str( $c->{expires} );
+        }
+        else {
             next if $args->{persistent};
         }
         for my $attr (qw/Domain Path Creation_Time Last_Access_Time/) {
@@ -113,13 +110,23 @@ sub dump_cookies {
 # returns self
 sub load_cookies {
     my ( $self, @cookies ) = @_;
-    for my $cookie ( @cookies ) {
-        my $p = _parse_cookie($cookie, 1);
+    for my $cookie (@cookies) {
+        my $p = _parse_cookie( $cookie, 1 );
         next unless exists $p->{domain} && exists $p->{path};
         $p->{$_} //= time for qw/creation_time last_access_time/;
         $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
     }
     return $self;
+}
+
+#--------------------------------------------------------------------------#
+# private methods
+#--------------------------------------------------------------------------#
+
+sub _all_cookies {
+    return map {
+        { %$_ }
+    } map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
 }
 
 #--------------------------------------------------------------------------#
@@ -130,9 +137,9 @@ my $pub_re = qr/(?:domain|path|expires|max-age|httponly|secure)/;
 my $pvt_re = qr/(?:$pub_re|creation_time|last_access_time|hostonly)/;
 
 sub _parse_cookie {
-    my ($cookie, $private) = @_;
-    my ( $kvp, @attrs ) = split /;/, $cookie // '';
-    my ( $name, $value ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '', 2;
+    my ( $cookie, $private ) = @_;
+    my ( $kvp,    @attrs )   = split /;/, $cookie // '';
+    my ( $name,   $value )   = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '', 2;
     return unless length $name;
     my $parse = { name => $name, value => $value // "" };
     for my $s (@attrs) {
