@@ -39,6 +39,9 @@
          }
       },
       "runtime" : {
+         "recommends" : {
+            "Mozilla::PublicSuffix" : "0"
+         },
          "requires" : {
             "Carp" : "0",
             "HTTP::Date" : "0",
@@ -59,6 +62,7 @@
             "List::Util" : "0",
             "Test::Deep" : "0",
             "Test::More" : "0.96",
+            "Test::Requires" : "0",
             "Time::Mock" : "0",
             "URI" : "0"
          }

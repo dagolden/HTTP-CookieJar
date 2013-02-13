@@ -191,8 +191,9 @@ encoded in ASCII form.
 
 =head2 Public suffixes
 
-Cookies that set the C<Domain> value to a public suffix are currently
-permitted.  This is likely to change in a future release.
+If L<Mozilla::PublicSuffix> is installed, cookie domains will be checked
+against the public suffix list.  Public suffix cookies are only allowed
+as host-only cookies.
 
 =head2 Third-party cookies
 

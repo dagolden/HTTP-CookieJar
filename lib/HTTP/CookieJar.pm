@@ -9,6 +9,8 @@ package HTTP::CookieJar;
 use Carp ();
 use HTTP::Date ();
 
+my $HAS_MPS = eval { require Mozilla::PublicSuffix; 1 };
+
 =construct new
 
     my $jar = HTTP::CookieJar->new;
@@ -45,16 +47,17 @@ sub add {
 
     return unless my $parse = _parse_cookie($cookie);
     my $name = $parse->{name};
+
     # check and normalize domain
-    # XXX doesn't check for public suffixes; see Mozilla::PublicSuffix
     if ( exists $parse->{domain} ) {
-        return unless _domain_match( $host, $parse->{domain} );
+        _normalize_domain( $host, $parse ) or return;
     }
     else {
         $parse->{domain}   = $host;
         $parse->{hostonly} = 1;
     }
     my $domain = $parse->{domain};
+
     # normalize path
     if ( !exists $parse->{path} || substr( $parse->{path}, 0, 1 ) ne "/" ) {
         $parse->{path} = _default_path($request_path);
@@ -292,6 +295,28 @@ sub _domain_match {
     return;
 }
 
+sub _normalize_domain {
+    my ( $host, $parse ) = @_;
+
+    if ( $HAS_MPS )  {
+        my $host_pub_suff = eval { Mozilla::PublicSuffix::public_suffix($host) } // '';
+        if ( _domain_match( $host_pub_suff, $parse->{domain} ) ) {
+            if ( $parse->{domain} eq $host ) {
+                return $parse->{hostonly} = 1;
+            }
+            else {
+                return;
+            }
+        }
+    }
+
+    if ( $parse->{domain} !~ m{\.} && $parse->{domain} eq $host ) {
+        return $parse->{hostonly} = 1;
+    }
+
+    return _domain_match( $host, $parse->{domain} );
+}
+
 sub _default_path {
     my ($path) = @_;
     return "/" if !length $path || substr( $path, 0, 1 ) ne "/";
@@ -375,8 +400,9 @@ encoded in ASCII form.
 
 =head2 Public suffixes
 
-Cookies that set the C<Domain> value to a public suffix are currently
-permitted.  This is likely to change in a future release.
+If L<Mozilla::PublicSuffix> is installed, cookie domains will be checked
+against the public suffix list.  Public suffix cookies are only allowed
+as host-only cookies.
 
 =head2 Third-party cookies
 

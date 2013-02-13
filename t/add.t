@@ -40,6 +40,46 @@ my @cases = (
         store   => {},
     },
     {
+        label   => "localhost treated as host only",
+        request => "http://localhost/",
+        cookies => ["SID=31d4d96e407aad42; Domain=localhost"],
+        store   => {
+            'localhost' => {
+                '/' => {
+                    SID => {
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "localhost",
+                        hostonly         => 1,
+                        path             => "/",
+                    }
+                }
+            },
+        },
+    },
+    {
+        label   => "single domain level treated as host only",
+        request => "http://foobar/",
+        cookies => ["SID=31d4d96e407aad42; Domain=foobar"],
+        store   => {
+            'foobar' => {
+                '/' => {
+                    SID => {
+                        name             => "SID",
+                        value            => "31d4d96e407aad42",
+                        creation_time    => ignore(),
+                        last_access_time => ignore(),
+                        domain           => "foobar",
+                        hostonly         => 1,
+                        path             => "/",
+                    }
+                }
+            },
+        },
+    },
+    {
         label   => "different domain not stored",
         request => "http://example.com/",
         cookies => ["SID=31d4d96e407aad42; Domain=example.org"],
