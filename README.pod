@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-HTTP::CookieJar - A tiny HTTP cookie jar
+HTTP::CookieJar - A minimalist HTTP user agent cookie jar
 
 =head1 VERSION
 
@@ -11,6 +11,14 @@ version 0.001
 =head1 SYNOPSIS
 
   use HTTP::CookieJar;
+
+  my $jar = HTTP::CookieJar->new;
+
+  # add cookie received from a request
+  $jar->add( "http://www.example.com/", "CUSTOMER=WILE_E_COYOTE" );
+
+  # extract cookie header for a given request
+  my $cookie = $jar->cookie_header( "http://www.example.com/" );
 
 =head1 DESCRIPTION
 

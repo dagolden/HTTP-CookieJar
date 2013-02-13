@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 package HTTP::CookieJar;
-# ABSTRACT: A tiny HTTP cookie jar
+# ABSTRACT: A minimalist HTTP user agent cookie jar
 # VERSION
 
 use Path::Tiny ();
@@ -253,6 +253,14 @@ sub _split_url {
 =head1 SYNOPSIS
 
   use HTTP::CookieJar;
+
+  my $jar = HTTP::CookieJar->new;
+
+  # add cookie received from a request
+  $jar->add( "http://www.example.com/", "CUSTOMER=WILE_E_COYOTE" );
+
+  # extract cookie header for a given request
+  my $cookie = $jar->cookie_header( "http://www.example.com/" );
 
 =head1 DESCRIPTION
 

@@ -1,5 +1,5 @@
 {
-   "abstract" : "A tiny HTTP cookie jar",
+   "abstract" : "A minimalist HTTP user agent cookie jar",
    "author" : [
       "David Golden <dagolden@cpan.org>"
    ],
@@ -54,8 +54,6 @@
             "File::Find" : "0",
             "File::Spec::Functions" : "0",
             "File::Temp" : "0",
-            "HTTP::CookieJar" : "0",
-            "HTTP::CookieJar::LWP" : "0",
             "HTTP::Request" : "0",
             "HTTP::Response" : "0",
             "List::Util" : "0",
@@ -68,11 +66,11 @@
    },
    "provides" : {
       "HTTP::CookieJar" : {
-         "file" : "lib/HTTP/Cookies/Tiny.pm",
+         "file" : "lib/HTTP/CookieJar.pm",
          "version" : "0.001"
       },
       "HTTP::CookieJar::LWP" : {
-         "file" : "lib/HTTP/Cookies/Tiny/LWP.pm",
+         "file" : "lib/HTTP/CookieJar/LWP.pm",
          "version" : "0.001"
       }
    },
