@@ -76,7 +76,7 @@ sub cookies_for {
 
     my @found;
     my $now = time;
-    for my $cookie ( $self->all_cookies ) {
+    for my $cookie ( $self->_all_cookies ) {
         next if $cookie->{hostonly}           && $host ne $cookie->{domain};
         next if $cookie->{secure}             && $scheme ne 'https';
         next if defined( $cookie->{expires} ) && $cookie->{expires} < $now;
@@ -96,7 +96,7 @@ sub cookie_header {
     return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($req) );
 }
 
-sub all_cookies {
+sub _all_cookies {
     return map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
 }
 
@@ -104,7 +104,7 @@ sub all_cookies {
 sub as_list {
     my ( $self, $args ) = @_;
     my @list;
-    for my $c ( $self->all_cookies ) {
+    for my $c ( $self->_all_cookies ) {
         next if $args->{persistent} && !defined $c->{expires};
         my @parts = "$c->{name}=$c->{value}";
         for my $attr (qw/Domain Path Expires Creation_Time Last_Access_Time/) {
