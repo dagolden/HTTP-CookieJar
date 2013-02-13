@@ -6,6 +6,8 @@ package HTTP::Cookies::Tiny;
 # ABSTRACT: A tiny HTTP cookie jar
 # VERSION
 
+use Path::Tiny ();
+
 sub new {
     my ($class) = @_;
     bless { store => {} }, $class;
@@ -14,6 +16,21 @@ sub new {
 sub clear {
     my ($self) = @_;
     $self->{store} = {};
+}
+
+sub save {
+    my ( $self, $filename ) = @_;
+    Path::Tiny::path($filename)->spew( join( "\n", $self->as_list ) );
+}
+
+sub load {
+    my ( $self, $filename ) = @_;
+    for my $cookie ( Path::Tiny::path($filename)->lines( { chomp => 1 } ) ) {
+        my $p = _parse_cookie($cookie, 1);
+        $p->{$_} //= time for qw/creation_time last_access_time/;
+        $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
+    }
+    return $self;
 }
 
 sub add {
@@ -94,10 +111,10 @@ sub as_list {
     for my $c ( $self->all_cookies ) {
         next if $args->{persistent} && !defined $c->{expires};
         my @parts = "$c->{name}=$c->{value}";
-        for my $attr (qw/Domain Path Expires/) {
+        for my $attr (qw/Domain Path Expires Creation_Time Last_Access_Time/) {
             push @parts, "$attr=$c->{lc $attr}" if defined $c->{ lc $attr };
         }
-        for my $attr (qw/Secure HttpOnly/) {
+        for my $attr (qw/Secure HttpOnly HostOnly/) {
             push @parts, $attr if $c->{ lc $attr };
         }
         push @list, join( "; ", @parts );
@@ -109,8 +126,11 @@ sub as_list {
 # Helper subroutines
 #--------------------------------------------------------------------------#
 
+my $pub_re = qr/(?:domain|path|expires|max-age|httponly|secure)/;
+my $pvt_re = qr/(?:$pub_re|creation_time|last_access_time|hostonly)/;
+
 sub _parse_cookie {
-    my ($cookie) = @_;
+    my ($cookie, $private) = @_;
     my ( $kvp, @attrs ) = split /;/, $cookie // '';
     my ( $name, $value ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $kvp // '', 2;
     return unless length $name;
@@ -119,8 +139,8 @@ sub _parse_cookie {
         next unless defined $s && $s =~ /\S/;
         my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split /=/, $s, 2;
         $k = lc $k;
-        next unless $k =~ m/^(?:domain|path|expires|max-age|httponly|secure)$/;
-        $v = 1 if $k =~ m/^(?:httponly|secure)$/; # boolean flag if present
+        next unless $private ? ( $k =~ m/^$pvt_re$/ ) : ( $k =~ m/^$pub_re$/ );
+        $v = 1 if $k =~ m/^(?:httponly|secure|hostonly)$/; # boolean flag if present
         $v = _parse_http_date($v) if $k eq 'expires'; # convert to epoch
         next unless length $v;
         $v =~ s{^\.}{}                            if $k eq 'domain'; # strip leading dot
