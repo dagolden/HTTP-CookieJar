@@ -97,7 +97,7 @@ sub cookie_header {
 }
 
 sub _all_cookies {
-    return map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
+    return map { { %$_ } } map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
 }
 
 # generate as list that can be fed back in to add
