@@ -6,6 +6,7 @@ package HTTP::CookieJar;
 # ABSTRACT: A minimalist HTTP user agent cookie jar
 # VERSION
 
+use Carp ();
 use HTTP::Date ();
 
 sub new {
@@ -15,7 +16,8 @@ sub new {
 
 sub add {
     my ( $self, $request, $cookie ) = @_;
-    my ( $scheme, $host, $port, $request_path ) = _split_url($request);
+    my ( $scheme, $host, $port, $request_path ) = eval {_split_url($request)};
+    Carp::croak($@) if $@;
 
     return unless my $parse = _parse_cookie($cookie);
     my $name = $parse->{name};
@@ -50,17 +52,19 @@ sub add {
     else {
         $self->{store}{$domain}{$path}{$name} = $parse;
     }
+    return 1;
 }
 
 sub clear {
     my ($self) = @_;
     $self->{store} = {};
+    return 1;
 }
 
 sub cookies_for {
     my ( $self, $request ) = @_;
-    return unless length $request;
-    my ( $scheme, $host, $port, $request_path ) = _split_url($request);
+    my ( $scheme, $host, $port, $request_path ) = eval { _split_url($request) };
+    Carp::croak($@) if $@;
 
     my @found;
     my $now = time;
@@ -80,7 +84,6 @@ sub cookies_for {
 
 sub cookie_header {
     my ( $self, $req ) = @_;
-    return unless length $req;
     return join( "; ", map { "$_->{name}=$_->{value}" } $self->cookies_for($req) );
 }
 
@@ -187,6 +190,7 @@ sub _path_match {
 
 sub _split_url {
     my $url = shift;
+    die(qq/No URL provided\n/) unless length $url;
 
     # URI regex adapted from the URI module
     # XXX path_query here really chops at ? or # to get just the path and not the query
