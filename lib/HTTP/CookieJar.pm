@@ -42,6 +42,7 @@ successful cookie processing or undef/empty-list on failure.
 
 sub add {
     my ( $self, $request, $cookie ) = @_;
+    return unless length $cookie;
     my ( $scheme, $host, $port, $request_path ) = eval { _split_url($request) };
     Carp::croak($@) if $@;
 
