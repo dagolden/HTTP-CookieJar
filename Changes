@@ -2,6 +2,12 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - Won't warn about undefined value for length on empty cookie on old Perls
+
+    - Requires Time::Local 1.1901 to fix Y2038 bug on old Perls
+
 0.001     2013-02-13 16:41:24 America/New_York
 
     - First release
