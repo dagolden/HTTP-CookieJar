@@ -1,6 +1,7 @@
 use 5.008001;
 use warnings;
 use Test::More 0.96;
+use Time::Local;
 
 use HTTP::CookieJar::LWP;
 use HTTP::Request;
@@ -610,9 +611,12 @@ $cookie=interact($c, "http://example.com/");
 is($cookie, "foo=\"bar\"", "version ignored");
 
 # Test cookies that expire far into the future [RT#50147] ( or past ? )
+# if we can't do far future, use 2037
+my $future = eval { timegm(1,2,3,4,5,2039) } ? 2211 : 2037;
+
 $c = HTTP::CookieJar::LWP->new;
 interact($c, "http://example.com/foo",
-    "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL; expires=Mon, 03-Oct-2211 15:18:10 GMT; path=/; domain=.example.com",
+    "PREF=ID=cee18f7c4e977184:TM=1254583090:LM=1254583090:S=Pdb0-hy9PxrNj4LL; expires=Mon, 03-Oct-$future 15:18:10 GMT; path=/; domain=.example.com",
     "expired1=1; expires=Mon, 03-Oct-2001 15:18:10 GMT; path=/; domain=.example.com",
     "expired2=1; expires=Fri Jan  1 00:00:00 GMT 1970; path=/; domain=.example.com",
     "expired3=1; expires=Fri Jan  1 00:00:01 GMT 1970; path=/; domain=.example.com",

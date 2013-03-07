@@ -2,6 +2,10 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - Another attempt to avoid test failures on older, 32-bit Perls
+
 0.002     2013-03-07 06:12:04 America/New_York
 
     [FIXED]
