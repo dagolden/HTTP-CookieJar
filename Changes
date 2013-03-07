@@ -2,6 +2,8 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+0.002     2013-03-07 06:12:04 America/New_York
+
     [FIXED]
 
     - Won't warn about undefined value for length on empty cookie on old Perls
