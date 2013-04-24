@@ -4,8 +4,7 @@ use Test::More 0.96;
 use Time::Local;
 
 use HTTP::CookieJar::LWP;
-use HTTP::Request;
-use HTTP::Response;
+use Test::Requires qw( HTTP::Request HTTP::Response );
 
 #-------------------------------------------------------------------
 # First we check that it works for the original example at

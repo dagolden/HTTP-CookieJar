@@ -2,6 +2,11 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [REMOVED]
+
+    - Removed test dependency on HTTP::Request/Response; The LWP adapter
+      test will only be run if they are already available
+
 0.003     2013-03-07 17:49:40 America/New_York
 
     [FIXED]
