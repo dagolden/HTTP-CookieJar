@@ -2,6 +2,10 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - Fixed test failure under hash randomization
+
 0.004     2013-04-23 22:24:25 America/New_York
 
     [REMOVED]

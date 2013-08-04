@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300034, CPAN::Meta::Converter version 2.130880",
+   "generated_by" : "Dist::Zilla version 4.300035, CPAN::Meta::Converter version 2.132140",
    "license" : [
       "apache_2_0"
    ],
@@ -71,11 +71,11 @@
    "provides" : {
       "HTTP::CookieJar" : {
          "file" : "lib/HTTP/CookieJar.pm",
-         "version" : "0.004"
+         "version" : "0.005"
       },
       "HTTP::CookieJar::LWP" : {
          "file" : "lib/HTTP/CookieJar/LWP.pm",
-         "version" : "0.004"
+         "version" : "0.005"
       }
    },
    "release_status" : "stable",
@@ -90,6 +90,7 @@
          "web" : "https://github.com/dagolden/http-cookiejar"
       }
    },
-   "version" : "0.004"
+   "version" : "0.005",
+   "x_authority" : "cpan:DAGOLDEN"
 }
 
