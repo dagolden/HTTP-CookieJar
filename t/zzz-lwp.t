@@ -225,7 +225,7 @@ is($cookie, "Customer=WILE_E_COYOTE");
 $cookie = interact($c, "http://www.acme.com/acme/shipping",
                    'Shipping=FedEx; Path=/acme');
 
-like($cookie, qr/Part_Number=Rocket_Launcher_0001;/);
+like($cookie, qr/Part_Number=Rocket_Launcher_0001/);
 like($cookie, qr/Customer=WILE_E_COYOTE/ );
 
 #
