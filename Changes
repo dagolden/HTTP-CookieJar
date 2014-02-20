@@ -2,6 +2,8 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+0.006     2014-02-19 19:52:00-05:00 America/New_York
+
     [FIXED]
 
     - Fixed file encoding of test files
