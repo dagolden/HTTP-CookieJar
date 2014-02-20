@@ -2,6 +2,16 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - Fixed file encoding of test files
+
+    [CHANGED]
+
+    - Updated distribution repo URL and other meta files
+
+    - Tidied test files
+
 0.005     2013-08-03 21:41:10 America/New_York
 
     [FIXED]
