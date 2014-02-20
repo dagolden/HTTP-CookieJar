@@ -386,9 +386,9 @@ is(count_cookies($c), 6);
 $c = HTTP::CookieJar::LWP->new;
 interact($c, "http://www.acme.com/foo%2f%25/%40%40%0Anew%E5/%E5", 'foo  =   bar');
 ##;
-$cookie = interact($c, "http://www.acme.com/foo%2f%25/@@%0anewå/æøå", "bar=baz; path=/foo/");
+$cookie = interact($c, "http://www.acme.com/foo%2f%25/@@%0anewÃ¥/Ã¦Ã¸Ã¥", "bar=baz; path=/foo/");
 ok($cookie =~ /foo=bar/);
-$cookie = interact($c, "http://www.acme.com/foo/%25/@@%0anewå/æøå");
+$cookie = interact($c, "http://www.acme.com/foo/%25/@@%0anewÃ¥/Ã¦Ã¸Ã¥");
 ok($cookie);
 undef($c);
 
