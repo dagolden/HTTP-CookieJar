@@ -29,12 +29,12 @@ my @cases = (
 );
 
 for my $c (@cases) {
-    my $jar = HTTP::CookieJar->new;
+    my $jar    = HTTP::CookieJar->new;
     my $offset = 0;
     for my $cookie ( @{ $c->{cookies} } ) {
         Time::Mock->offset($offset);
         $jar->add(@$cookie);
-        $offset+=10;
+        $offset += 10;
     }
     my @cookies = $jar->cookies_for( $c->{request} );
     my @vals = map { $_->{value} } @cookies;

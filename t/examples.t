@@ -21,7 +21,7 @@ subtest "secure" => sub {
     $jar->add( $req, "SID=31d4d96e407aad42; Secure" );
     $jar->add( $req, "lang=en-US; Path=/; Domain=example.com" );
     is( $jar->cookie_header($sreq), "SID=31d4d96e407aad42; lang=en-US" );
-    is( $jar->cookie_header($req), "lang=en-US" );
+    is( $jar->cookie_header($req),  "lang=en-US" );
 };
 
 subtest "not a subdomain" => sub {
@@ -43,7 +43,6 @@ subtest "expiration" => sub {
     $jar->add( $req, "lang=; Expires=Sun, 06 Nov 1994 08:49:37 GMT" );
     is( $jar->cookie_header($req), "" );
 };
-
 
 done_testing;
 # COPYRIGHT

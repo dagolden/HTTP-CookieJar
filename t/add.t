@@ -174,11 +174,7 @@ my @cases = (
         label   => "expired supercedes prior",
         request => "http://example.com/",
         cookies => [ "SID=31d4d96e407aad42", "SID=0000000000000000; Max-Age=-60", ],
-        store   => {
-            'example.com' => {
-                '/' => {},
-            },
-        },
+        store   => { 'example.com' => { '/' => {}, }, },
     },
     {
         label   => "separated by path",
