@@ -3,7 +3,8 @@ use strict;
 use warnings;
 use Test::More 0.96;
 use Test::Deep '!blessed';
-use Time::Mock;
+use lib 't/lib';
+use MockTime;
 
 use HTTP::CookieJar;
 
@@ -32,7 +33,7 @@ for my $c (@cases) {
     my $jar    = HTTP::CookieJar->new;
     my $offset = 0;
     for my $cookie ( @{ $c->{cookies} } ) {
-        Time::Mock->offset($offset);
+        MockTime->offset($offset);
         $jar->add(@$cookie);
         $offset += 10;
     }

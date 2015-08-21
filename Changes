@@ -2,6 +2,10 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [PREREQS]
+
+    - Dropped Time::Mock dependency to allow building on Windows
+
     [META]
 
     - Modernized repo layout for newest DAGOLDEN Dist::Zilla bundle
