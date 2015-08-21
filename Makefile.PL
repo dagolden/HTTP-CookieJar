@@ -1,0 +1,69 @@
+use strict;
+use warnings;
+
+use 5.010000;
+
+use ExtUtils::MakeMaker 6.17;
+
+my %WriteMakefileArgs = (
+  "ABSTRACT" => "A minimalist HTTP user agent cookie jar",
+  "AUTHOR" => "David Golden <dagolden\@cpan.org>",
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.17"
+  },
+  "DISTNAME" => "HTTP-CookieJar",
+  "LICENSE" => "apache",
+  "MIN_PERL_VERSION" => "5.010000",
+  "NAME" => "HTTP::CookieJar",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "HTTP::Date" => 0,
+    "Time::Local" => "1.1901",
+    "parent" => 0,
+    "strict" => 0,
+    "warnings" => 0
+  },
+  "TEST_REQUIRES" => {
+    "ExtUtils::MakeMaker" => 0,
+    "File::Spec" => 0,
+    "Test::Deep" => 0,
+    "Test::More" => "0.96",
+    "Test::Requires" => 0,
+    "Time::Local" => "1.1901",
+    "Time::Mock" => 0,
+    "URI" => 0
+  },
+  "VERSION" => "0.007",
+  "test" => {
+    "TESTS" => "t/*.t"
+  }
+);
+
+
+my %FallbackPrereqs = (
+  "Carp" => 0,
+  "ExtUtils::MakeMaker" => 0,
+  "File::Spec" => 0,
+  "HTTP::Date" => 0,
+  "Test::Deep" => 0,
+  "Test::More" => "0.96",
+  "Test::Requires" => 0,
+  "Time::Local" => "1.1901",
+  "Time::Mock" => 0,
+  "URI" => 0,
+  "parent" => 0,
+  "strict" => 0,
+  "warnings" => 0
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  delete $WriteMakefileArgs{TEST_REQUIRES};
+  delete $WriteMakefileArgs{BUILD_REQUIRES};
+  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
