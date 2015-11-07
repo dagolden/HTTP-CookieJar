@@ -4,7 +4,7 @@ use warnings;
 
 package HTTP::CookieJar::LWP;
 # ABSTRACT: LWP adapter for HTTP::CookieJar
-our $VERSION = '0.008';
+our $VERSION = '0.009';
 
 use parent 'HTTP::CookieJar';
 
