@@ -2,6 +2,10 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+    [PREREQS]
+
+    - Dropped minimum Perl requirement to 5.8.1
+
 0.007     2015-08-21 13:57:31-04:00 America/New_York
 
     [PREREQS]
