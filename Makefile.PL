@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use 5.010000;
+use 5.008001;
 
 use ExtUtils::MakeMaker 6.17;
 
@@ -13,7 +13,7 @@ my %WriteMakefileArgs = (
   },
   "DISTNAME" => "HTTP-CookieJar",
   "LICENSE" => "apache",
-  "MIN_PERL_VERSION" => "5.010000",
+  "MIN_PERL_VERSION" => "5.008001",
   "NAME" => "HTTP::CookieJar",
   "PREREQ_PM" => {
     "Carp" => 0,

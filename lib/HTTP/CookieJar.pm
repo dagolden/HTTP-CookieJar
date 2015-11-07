@@ -1,4 +1,4 @@
-use v5.10;
+use 5.008001;
 use strict;
 use warnings;
 
@@ -42,7 +42,7 @@ successful cookie processing or undef/empty-list on failure.
 
 sub add {
     my ( $self, $request, $cookie ) = @_;
-    return unless length $cookie;
+    return unless defined $cookie and length $cookie;
     my ( $scheme, $host, $port, $request_path ) = eval { _split_url($request) };
     Carp::croak($@) if $@;
 
@@ -241,7 +241,7 @@ sub load_cookies {
     for my $cookie (@cookies) {
         my $p = _parse_cookie( $cookie, 1 );
         next unless exists $p->{domain} && exists $p->{path};
-        $p->{$_} //= time for qw/creation_time last_access_time/;
+        $p->{$_} = time for grep { !defined $p->{$_} } qw/creation_time last_access_time/;
         $self->{store}{ $p->{domain} }{ $p->{path} }{ $p->{name} } = $p;
     }
     return $self;
@@ -267,19 +267,22 @@ my $pvt_re = qr/(?:$pub_re|creation_time|last_access_time|hostonly)/;
 
 sub _parse_cookie {
     my ( $cookie, $private ) = @_;
-    my ( $kvp, @attrs ) = split /;/, $cookie // '';
+    $cookie = '' unless defined $cookie;
+    my ( $kvp, @attrs ) = split /;/, $cookie;
+    $kvp = '' unless defined $kvp;
     my ( $name, $value ) =
-      map { s/^\s*//; s/\s*$//; $_ } split( /=/, $kvp // '', 2 ); ## no critic
+      map { s/^\s*//; s/\s*$//; $_ } split( /=/, $kvp, 2 ); ## no critic
 
-    return unless length $name;
-    my $parse = { name => $name, value => $value // "" };
+    return unless defined $name and length $name;
+    $value = '' unless defined $value;
+    my $parse = { name => $name, value => $value };
     for my $s (@attrs) {
         next unless defined $s && $s =~ /\S/;
         my ( $k, $v ) = map { s/^\s*//; s/\s*$//; $_ } split( /=/, $s, 2 ); ## no critic
         $k = lc $k;
         next unless $private ? ( $k =~ m/^$pvt_re$/ ) : ( $k =~ m/^$pub_re$/ );
         $v = 1 if $k =~ m/^(?:httponly|secure|hostonly)$/; # boolean flag if present
-        $v = HTTP::Date::str2time($v) // 0 if $k eq 'expires'; # convert to epoch
+        $v = HTTP::Date::str2time($v) || 0 if $k eq 'expires'; # convert to epoch
         next unless length $v;
         $v =~ s{^\.}{}                            if $k eq 'domain'; # strip leading dot
         $v =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if $k eq 'path';   # unescape
@@ -302,7 +305,8 @@ sub _normalize_domain {
     my ( $host, $parse ) = @_;
 
     if ($HAS_MPS) {
-        my $host_pub_suff = eval { Mozilla::PublicSuffix::public_suffix($host) } // '';
+        my $host_pub_suff = eval { Mozilla::PublicSuffix::public_suffix($host) };
+        $host_pub_suff = '' unless defined $host_pub_suff;
         if ( _domain_match( $host_pub_suff, $parse->{domain} ) ) {
             if ( $parse->{domain} eq $host ) {
                 return $parse->{hostonly} = 1;
@@ -340,7 +344,7 @@ sub _path_match {
 
 sub _split_url {
     my $url = shift;
-    die(qq/No URL provided\n/) unless length $url;
+    die(qq/No URL provided\n/) unless defined $url and length $url;
 
     # URI regex adapted from the URI module
     # XXX path_query here really chops at ? or # to get just the path and not the query
