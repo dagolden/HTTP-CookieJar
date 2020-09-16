@@ -67,7 +67,12 @@ sub add {
     # set timestamps and normalize expires
     my $now = $parse->{creation_time} = $parse->{last_access_time} = time;
     if ( exists $parse->{'max-age'} ) {
-        $parse->{expires} = $now + delete $parse->{'max-age'};
+        # "If delta-seconds is less than or equal to zero (0), let expiry-time
+        # be the earliest representable date and time."
+        $parse->{expires} = $parse->{'max-age'} <= 0
+            ? 0
+            : $now + $parse->{'max-age'};
+        delete $parse->{'max-age'};
     }
     # update creation time from old cookie, if exists
     if ( my $old = $self->{store}{$domain}{$path}{$name} ) {
