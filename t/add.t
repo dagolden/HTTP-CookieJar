@@ -214,6 +214,7 @@ my @cases = (
         request => "http://example.com/",
         cookies => [
             "lang=en-us; Max-Age=100; Expires=Thu, 1 Jan 1970 00:00:00 GMT",
+            "SID=0000000000000000; Expires=Thu, 3 Jan 4841 00:00:00 GMT",
             "SID=31d4d96e407aad42; Max-Age=0; Expires=Thu, 3 Jan 4841 00:00:00 GMT",
             "FOO=0000000000000000; Max-Age=-100; Expires=Thu, 3 Jan 4841 00:00:00 GMT",
         ],
