@@ -9,7 +9,19 @@ our $VERSION = '0.011';
 use Carp       ();
 use HTTP::Date ();
 
-my $HAS_MPS = eval { require Mozilla::PublicSuffix; 1 };
+# Override this to load public suffix data differently
+sub _public_suffix_object {
+    IO::Socket::SSL::PublicSuffix->default;
+}
+
+our $public_suffix; 
+if ( eval { require IO::Socket::SSL::PublicSuffix; 1 } ) {
+    $public_suffix = _public_suffix_object();
+}
+my $HAS_MPS;
+unless ($public_suffix) {
+    $HAS_MPS = eval { require Mozilla::PublicSuffix; 1 };
+}
 
 =construct new
 
@@ -309,8 +321,14 @@ sub _domain_match {
 sub _normalize_domain {
     my ( $host, $parse ) = @_;
 
-    if ($HAS_MPS) {
-        my $host_pub_suff = eval { Mozilla::PublicSuffix::public_suffix($host) };
+    if ( $public_suffix or $HAS_MPS ) {
+        my $host_pub_suff;
+        if ($public_suffix ) {
+            $host_pub_suff = eval { $public_suffix->public_suffix($host) };
+        }
+        else {
+            $host_pub_suff = eval { Mozilla::PublicSuffix::public_suffix($host) };
+        }
         $host_pub_suff = '' unless defined $host_pub_suff;
         if ( _domain_match( $host_pub_suff, $parse->{domain} ) ) {
             if ( $parse->{domain} eq $host ) {
@@ -412,9 +430,9 @@ encoded in ASCII form.
 
 =head2 Public suffixes
 
-If L<Mozilla::PublicSuffix> is installed, cookie domains will be checked
-against the public suffix list.  Public suffix cookies are only allowed
-as host-only cookies.
+If L<IO::Socket::SSL::PublicSuffix> or L<Mozilla::PublicSuffix> is
+installed, cookie domains will be checked against the public suffix
+list.  Public suffix cookies are only allowed as host-only cookies.
 
 =head2 Third-party cookies
 
