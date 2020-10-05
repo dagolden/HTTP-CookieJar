@@ -3,7 +3,8 @@ use strict;
 use warnings;
 use Test::More 0.96;
 use Test::Deep '!blessed';
-use Test::Requires 'Mozilla::PublicSuffix';
+use Test::Requires;
+test_requires $public_suffix_module;
 
 use HTTP::CookieJar;
 
