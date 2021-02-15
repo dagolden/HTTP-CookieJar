@@ -38,7 +38,7 @@ subtest "wrong path" => sub {
 
 subtest "expiration" => sub {
     $jar->clear;
-    $jar->add( $req, "lang=en-US; Expires=Wed, 09 Jun 2021 10:18:14 GMT" );
+    $jar->add( $req, "lang=en-US; Expires=Wed, 09 Jun 9999 10:18:14 GMT" );
     is( $jar->cookie_header($req), "lang=en-US" );
     $jar->add( $req, "lang=; Expires=Sun, 06 Nov 1994 08:49:37 GMT" );
     is( $jar->cookie_header($req), "" );
