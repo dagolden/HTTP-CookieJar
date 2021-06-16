@@ -4,7 +4,7 @@ use warnings;
 
 package HTTP::CookieJar;
 # ABSTRACT: A minimalist HTTP user agent cookie jar
-our $VERSION = '0.012';
+our $VERSION = '0.013';
 
 use Carp       ();
 use HTTP::Date ();
