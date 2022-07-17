@@ -124,8 +124,8 @@ Keys of a cookie hash reference might include:
 * secure -- if present, the cookie was set C<Secure>
 * httponly -- if present, the cookie was set C<HttpOnly>
 * hostonly -- if present, the cookie may only be used with the domain as a host
-* creation_time -- epoch seconds since the cookie was first stored
-* last_access_time -- epoch seconds since the cookie was last stored
+* creation_time -- epoch time when the cookie was first stored
+* last_access_time -- epoch time when the cookie was last accessed (i.e. "now")
 
 Keep in mind that C<httponly> means it should only be used in requests and not
 made available via Javascript, etc.  This is pretty meaningless for Perl user
@@ -139,6 +139,13 @@ It will throw an exception if the request URL is missing or invalid.
 
 sub cookies_for {
     my ( $self, $request ) = @_;
+    my @found = $self->_cookies_for($request);
+    return map { {%$_} } @found;
+}
+
+# _cookies_for returns originals, not copies, which helps in testing
+sub _cookies_for {
+    my ( $self, $request ) = @_;
     my ( $scheme, $host, $port, $request_path ) = eval { _split_url($request) };
     Carp::croak($@) if $@;
 
@@ -150,6 +157,7 @@ sub cookies_for {
         next if defined( $cookie->{expires} ) && $cookie->{expires} < $now;
         next unless _domain_match( $host, $cookie->{domain} );
         next unless _path_match( $request_path, $cookie->{path} );
+        $cookie->{last_access_time} = time;
         push @found, $cookie;
     }
     @found = sort {
@@ -256,11 +264,9 @@ sub load_cookies {
 # private methods
 #--------------------------------------------------------------------------#
 
-# return a copy of all cookies
+# return flattened list of all cookies
 sub _all_cookies {
-    return map {
-        { %$_ }
-    } map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
+    return map { values %$_ } map { values %$_ } values %{ $_[0]->{store} };
 }
 
 #--------------------------------------------------------------------------#
