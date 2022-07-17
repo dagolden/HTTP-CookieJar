@@ -2,6 +2,8 @@ Revision history for HTTP-CookieJar
 
 {{$NEXT}}
 
+0.013     2022-07-17 10:13:20-04:00 America/New_York (TRIAL RELEASE)
+
     [FIXED]
 
     - Cookie last access time is updated when a cookie is retrieved; this has
